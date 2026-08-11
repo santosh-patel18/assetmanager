@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Building2, Tags, Users, Edit, UserCheck, UserX, Clock, Copy, Check, X, Trash2 } from 'lucide-react';
+import { Plus, Building2, Tags, Users, Edit, UserCheck, UserX, Clock, Copy, Check, X, Trash2, ArrowRightLeft } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
 
@@ -26,6 +26,8 @@ export default function OrgPage() {
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [newRole, setNewRole] = useState('');
+  const [showDeptAssignDialog, setShowDeptAssignDialog] = useState(false);
+  const [assignDeptId, setAssignDeptId] = useState('');
   const [deptForm, setDeptForm] = useState({ name: '', parent_department_id: '', head_employee_id: '' });
   const [catForm, setCatForm] = useState({ name: '' });
   const [catFields, setCatFields] = useState<{ name: string; type: string; required: boolean }[]>([{ name: '', type: 'string', required: false }]);
@@ -312,14 +314,24 @@ export default function OrgPage() {
                       <td className="p-3"><Badge variant={emp.status === 'Active' ? 'success' : 'secondary'} className="text-xs">{emp.status}</Badge></td>
                       <td className="p-3">
                         {isAdmin && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => { setSelectedEmployee(emp); setNewRole(emp.role); setShowRoleDialog(true); }}
-                            className="gap-1 h-8"
-                          >
-                            <Edit className="h-3 w-3" /> Role
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => { setSelectedEmployee(emp); setNewRole(emp.role); setShowRoleDialog(true); }}
+                              className="gap-1 h-8"
+                            >
+                              <Edit className="h-3 w-3" /> Role
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => { setSelectedEmployee(emp); setAssignDeptId(emp.departmentId || ''); setShowDeptAssignDialog(true); }}
+                              className="gap-1 h-8"
+                            >
+                              <ArrowRightLeft className="h-3 w-3" /> Dept
+                            </Button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -429,6 +441,41 @@ export default function OrgPage() {
               </Select>
             </div>
             <DialogFooter><Button onClick={changeRole}>Save</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {/* Department Assignment Dialog */}
+        <Dialog open={showDeptAssignDialog} onOpenChange={setShowDeptAssignDialog}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Assign Department — {selectedEmployee?.name}</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Current: <strong>{selectedEmployee?.department?.name || 'No department'}</strong>
+              </p>
+              <Label>Select Department</Label>
+              <Select value={assignDeptId} onValueChange={setAssignDeptId}>
+                <SelectTrigger><SelectValue placeholder="Choose department" /></SelectTrigger>
+                <SelectContent>
+                  {departments.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button
+                disabled={!assignDeptId}
+                onClick={async () => {
+                  if (!selectedEmployee) return;
+                  await fetch(`/api/org/employees/${selectedEmployee.id}/department`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ departmentId: assignDeptId }),
+                  });
+                  setShowDeptAssignDialog(false);
+                  setSelectedEmployee(null);
+                  setAssignDeptId('');
+                  fetchAll();
+                }}
+              >Assign</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

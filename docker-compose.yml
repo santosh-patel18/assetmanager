@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # ─── PostgreSQL Database ──────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: assetflow
+      POSTGRES_PASSWORD: assetflow_dev_password
+      POSTGRES_DB: assetflow
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Enable btree_gist extension on startup (required for booking overlap prevention)
+      - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U assetflow']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── AssetFlow Application ────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://assetflow:assetflow_dev_password@db:5432/assetflow?schema=public
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-replace-in-production-immediately}
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NODE_ENV: production
+      UPLOAD_DIR: ./public/uploads
+      LOG_LEVEL: info
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/public/uploads
+
+volumes:
+  postgres_data:
+  uploads:

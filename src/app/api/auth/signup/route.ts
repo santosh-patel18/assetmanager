@@ -138,7 +138,6 @@ export async function POST(request: Request) {
           message: `New registration request from ${name} (${email}). Please review in Organization → Pending.`,
         })),
       });
-      });
     }
 
     return NextResponse.json(
