@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { EmptyState } from '@/components/ui/empty-state';
+import { useToast } from '@/components/ui/toast-notification';
 import { getStatusVariant, formatDateTime } from '@/lib/utils';
 import { CalendarDays, Plus, X } from 'lucide-react';
 
@@ -18,6 +20,7 @@ export default function BookingsPage() {
   const [showDialog, setShowDialog] = useState(false);
   const [form, setForm] = useState({ resource_id: '', start_time: '', end_time: '' });
   const [error, setError] = useState('');
+  const toast = useToast();
 
   const fetchBookings = () => {
     fetch('/api/bookings').then(r => r.json()).then(d => setBookings(d.bookings || []));
@@ -37,34 +40,42 @@ export default function BookingsPage() {
     });
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error === 'overlap' ? `Booking conflict! ${data.message}` : data.error || data.details?.end_time?.[0] || 'Booking failed');
+      const msg = data.error === 'overlap' ? `Booking conflict! ${data.message}` : data.error || data.details?.end_time?.[0] || 'Booking failed';
+      setError(msg);
+      toast.error('Booking Failed', msg);
       return;
     }
     setShowDialog(false);
     setForm({ resource_id: '', start_time: '', end_time: '' });
+    toast.success('Booking Confirmed', 'Your resource has been booked successfully.');
     fetchBookings();
   };
 
   const handleCancel = async (id: string) => {
     await fetch(`/api/bookings/${id}/cancel`, { method: 'PATCH' });
+    toast.info('Booking Cancelled');
     fetchBookings();
   };
 
   return (
     <div className="min-h-screen">
       <Header title="Resource Bookings" />
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 page-enter">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">Bookings</h2>
           <Button onClick={() => setShowDialog(true)} className="gap-2"><Plus className="h-4 w-4" /> Book Resource</Button>
         </div>
 
-        <div className="grid gap-4">
-          {bookings.map(booking => (
-            <Card key={booking.id} className="hover:border-primary/30 transition-colors">
+        <div className="grid gap-3">
+          {bookings.map((booking, i) => (
+            <Card
+              key={booking.id}
+              className="hover:border-primary/30 transition-all duration-200 opacity-0 animate-fade-in"
+              style={{ animationDelay: `${i * 50}ms` }}
+            >
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
                     <CalendarDays className="h-5 w-5" />
                   </div>
                   <div>
@@ -78,7 +89,7 @@ export default function BookingsPage() {
                 <div className="flex items-center gap-3">
                   <Badge variant={getStatusVariant(booking.status)} className="text-xs">{booking.status}</Badge>
                   {(booking.status === 'Upcoming' || booking.status === 'Ongoing') && (
-                    <Button variant="ghost" size="sm" className="h-8 text-xs text-destructive" onClick={() => handleCancel(booking.id)}>
+                    <Button variant="ghost" size="sm" className="h-8 text-xs text-destructive hover:text-destructive" onClick={() => handleCancel(booking.id)}>
                       <X className="h-3 w-3 mr-1" /> Cancel
                     </Button>
                   )}
@@ -86,7 +97,14 @@ export default function BookingsPage() {
               </CardContent>
             </Card>
           ))}
-          {bookings.length === 0 && <p className="text-center text-muted-foreground py-8">No bookings yet</p>}
+          {bookings.length === 0 && (
+            <EmptyState
+              icon={CalendarDays}
+              title="No bookings yet"
+              description="Book a shared resource like a meeting room or projector."
+              action={{ label: 'Book Resource', onClick: () => setShowDialog(true) }}
+            />
+          )}
         </div>
 
         <Dialog open={showDialog} onOpenChange={setShowDialog}>

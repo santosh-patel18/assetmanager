@@ -63,6 +63,14 @@ module.exports = {
           accent: "hsl(var(--sidebar-accent))",
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
         },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -94,6 +102,44 @@ module.exports = {
           "0%, 100%": { boxShadow: "0 0 0 0 rgba(99, 102, 241, 0.4)" },
           "50%": { boxShadow: "0 0 20px 5px rgba(99, 102, 241, 0.2)" },
         },
+        "shimmer": {
+          "100%": { transform: "translateX(100%)" },
+        },
+        "shake": {
+          "0%, 100%": { transform: "translateX(0)" },
+          "10%, 30%, 50%, 70%, 90%": { transform: "translateX(-4px)" },
+          "20%, 40%, 60%, 80%": { transform: "translateX(4px)" },
+        },
+        "float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        "bell-ring": {
+          "0%": { transform: "rotate(0)" },
+          "5%": { transform: "rotate(15deg)" },
+          "10%": { transform: "rotate(-13deg)" },
+          "15%": { transform: "rotate(10deg)" },
+          "20%": { transform: "rotate(-8deg)" },
+          "25%": { transform: "rotate(5deg)" },
+          "30%": { transform: "rotate(0)" },
+          "100%": { transform: "rotate(0)" },
+        },
+        "toast-timer": {
+          from: { width: "100%" },
+          to: { width: "0%" },
+        },
+        "slide-in-right": {
+          from: { opacity: "0", transform: "translateX(100%)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        "slide-out-right": {
+          from: { opacity: "1", transform: "translateX(0)" },
+          to: { opacity: "0", transform: "translateX(100%)" },
+        },
+        "count-up": {
+          from: { opacity: "0", transform: "translateY(10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -102,6 +148,13 @@ module.exports = {
         "slide-in": "slide-in 0.3s ease-out forwards",
         "scale-in": "scale-in 0.3s ease-out forwards",
         "pulse-glow": "pulse-glow 2s infinite",
+        "shimmer": "shimmer 2s infinite",
+        "shake": "shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both",
+        "float": "float 3s ease-in-out infinite",
+        "bell-ring": "bell-ring 2s ease infinite",
+        "toast-in": "slide-in-right 0.3s ease-out",
+        "toast-out": "slide-out-right 0.3s ease-in",
+        "count-up": "count-up 0.6s ease-out forwards",
       },
     },
   },

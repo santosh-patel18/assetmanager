@@ -36,6 +36,10 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-accent: 220 14.3% 95.9%;
     --sidebar-accent-foreground: 220.9 39.3% 11%;
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -68,6 +72,10 @@
     --sidebar-border: 215 27.9% 16.9%;
     --sidebar-accent: 215 27.9% 16.9%;
     --sidebar-accent-foreground: 210 20% 98%;
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
   }
 }
 
@@ -81,7 +89,7 @@
   }
 }
 
-/* Custom scrollbar */
+/* ─── Custom scrollbar ─────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -97,7 +105,7 @@
   background: hsl(var(--muted-foreground) / 0.5);
 }
 
-/* Glass effect */
+/* ─── Glass effects ────────────────────────────────────────────── */
 .glass {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
@@ -105,7 +113,15 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Gradient text */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Gradient utilities ───────────────────────────────────────── */
 .gradient-text {
   background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(280 70% 60%) 50%, hsl(var(--chart-3)) 100%);
   -webkit-background-clip: text;
@@ -113,25 +129,149 @@
   background-clip: text;
 }
 
-/* Animate on scroll */
-.animate-in-view {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fade-in 0.5s ease-out forwards;
+.gradient-border {
+  position: relative;
+  border: none !important;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.5), hsl(280 70% 60% / 0.3), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
-/* KPI Card glow */
+/* ─── KPI Card effects ─────────────────────────────────────────── */
 .kpi-card {
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .kpi-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px hsl(var(--primary) / 0.1);
 }
 
-/* Status badge styles */
+/* ─── Status badge styles ──────────────────────────────────────── */
 .status-available { @apply bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400; }
 .status-allocated { @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400; }
 .status-maintenance { @apply bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400; }
 .status-lost { @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400; }
 .status-retired { @apply bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400; }
+
+/* ─── Shimmer skeleton ─────────────────────────────────────────── */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: hsl(var(--muted));
+  border-radius: 0.5rem;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--muted-foreground) / 0.06),
+    hsl(var(--muted-foreground) / 0.1),
+    hsl(var(--muted-foreground) / 0.06),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* ─── Table row hover effect ───────────────────────────────────── */
+.table-row-hover {
+  position: relative;
+  transition: all 0.2s ease;
+}
+.table-row-hover::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: hsl(var(--primary));
+  border-radius: 0 3px 3px 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.table-row-hover:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+.table-row-hover:hover::before {
+  opacity: 1;
+}
+
+/* ─── Active sidebar indicator ─────────────────────────────────── */
+.nav-active-indicator {
+  position: relative;
+}
+.nav-active-indicator::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: hsl(var(--primary));
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.5);
+}
+
+/* ─── Toast progress bar ───────────────────────────────────────── */
+.toast-progress {
+  height: 3px;
+  background: hsl(var(--primary) / 0.3);
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden;
+}
+.toast-progress-bar {
+  height: 100%;
+  background: hsl(var(--primary));
+  animation: toast-timer 5s linear forwards;
+}
+
+/* ─── Notification bell ring ───────────────────────────────────── */
+.bell-ring {
+  animation: bell-ring 2s ease infinite;
+  transform-origin: top center;
+}
+
+/* ─── Page entrance animation helper ───────────────────────────── */
+.page-enter > * {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fade-in 0.4s ease-out forwards;
+}
+.page-enter > *:nth-child(1) { animation-delay: 0ms; }
+.page-enter > *:nth-child(2) { animation-delay: 80ms; }
+.page-enter > *:nth-child(3) { animation-delay: 160ms; }
+.page-enter > *:nth-child(4) { animation-delay: 240ms; }
+.page-enter > *:nth-child(5) { animation-delay: 320ms; }
+.page-enter > *:nth-child(6) { animation-delay: 400ms; }
+.page-enter > *:nth-child(7) { animation-delay: 480ms; }
+.page-enter > *:nth-child(8) { animation-delay: 560ms; }
+
+/* ─── Form error shake ─────────────────────────────────────────── */
+.form-shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* ─── Sidebar mobile overlay ───────────────────────────────────── */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 39;
+  opacity: 0;
+  animation: fade-in 0.2s ease-out forwards;
+}

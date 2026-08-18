@@ -3,11 +3,12 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/layout/header';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SkeletonTable } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { getStatusVariant } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
 import { Package, Plus, Search, Eye } from 'lucide-react';
@@ -41,12 +42,13 @@ export default function AssetsPage() {
   return (
     <div className="min-h-screen">
       <Header title="Asset Directory" />
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <div className="p-6 space-y-6 page-enter">
+        {/* Filters + Actions */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search assets..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-[300px]" />
+              <Input placeholder="Search assets..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 w-[280px]" />
             </div>
             <Select value={statusFilter} onValueChange={v => setStatusFilter(v === 'all' ? '' : v)}>
               <SelectTrigger className="w-[160px]"><SelectValue placeholder="All Statuses" /></SelectTrigger>
@@ -74,41 +76,66 @@ export default function AssetsPage() {
           )}
         </div>
 
-        <div className="border rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="text-left p-3 text-sm font-medium">Asset Tag</th>
-                <th className="text-left p-3 text-sm font-medium">Name</th>
-                <th className="text-left p-3 text-sm font-medium">Category</th>
-                <th className="text-left p-3 text-sm font-medium">Status</th>
-                <th className="text-left p-3 text-sm font-medium">Location</th>
-                <th className="text-left p-3 text-sm font-medium">Department</th>
-                <th className="text-left p-3 text-sm font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {assets.map(asset => (
-                <tr key={asset.id} className="border-t hover:bg-muted/30 transition-colors">
-                  <td className="p-3 text-sm font-mono font-medium text-primary">{asset.assetTag}</td>
-                  <td className="p-3 text-sm font-medium">{asset.name}</td>
-                  <td className="p-3 text-sm">{asset.category?.name}</td>
-                  <td className="p-3"><Badge variant={getStatusVariant(asset.status)} className="text-xs">{asset.status}</Badge></td>
-                  <td className="p-3 text-sm text-muted-foreground">{asset.location || '—'}</td>
-                  <td className="p-3 text-sm text-muted-foreground">{asset.department?.name || '—'}</td>
-                  <td className="p-3">
-                    <Link href={`/assets/${asset.id}`}>
-                      <Button variant="ghost" size="sm" className="gap-1 h-8"><Eye className="h-3 w-3" /> View</Button>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-              {assets.length === 0 && !loading && (
-                <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">No assets found</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        {/* Table */}
+        {loading ? (
+          <SkeletonTable rows={8} cols={7} />
+        ) : assets.length === 0 ? (
+          <EmptyState
+            icon={Package}
+            title="No assets found"
+            description={search || statusFilter || categoryFilter
+              ? "Try adjusting your search or filter criteria."
+              : "Get started by registering your first asset."}
+            action={
+              (user?.role === 'admin' || user?.role === 'asset_manager')
+                ? { label: 'Register Asset', onClick: () => window.location.href = '/assets/register' }
+                : undefined
+            }
+          />
+        ) : (
+          <>
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Asset Tag</th>
+                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Name</th>
+                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Category</th>
+                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Location</th>
+                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">Department</th>
+                    <th className="text-left p-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assets.map((asset, i) => (
+                    <tr
+                      key={asset.id}
+                      className="border-t table-row-hover opacity-0 animate-fade-in"
+                      style={{ animationDelay: `${i * 30}ms` }}
+                    >
+                      <td className="p-3 text-sm font-mono font-medium text-primary">{asset.assetTag}</td>
+                      <td className="p-3 text-sm font-medium">{asset.name}</td>
+                      <td className="p-3 text-sm hidden md:table-cell">{asset.category?.name}</td>
+                      <td className="p-3"><Badge variant={getStatusVariant(asset.status)} className="text-xs">{asset.status}</Badge></td>
+                      <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{asset.location || '—'}</td>
+                      <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{asset.department?.name || '—'}</td>
+                      <td className="p-3">
+                        <Link href={`/assets/${asset.id}`}>
+                          <Button variant="ghost" size="sm" className="gap-1 h-8 hover:text-primary transition-colors"><Eye className="h-3 w-3" /> View</Button>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Result count */}
+            <p className="text-xs text-muted-foreground text-center">
+              Showing {assets.length} asset{assets.length !== 1 ? 's' : ''}
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

@@ -5,12 +5,16 @@ import { Header } from '@/components/layout/header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { useToast } from '@/components/ui/toast-notification';
 import { formatDateTime } from '@/lib/utils';
-import { Bell, Check, CheckCheck } from 'lucide-react';
+import { Bell, Check, CheckCheck, Inbox } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const toast = useToast();
 
   const fetchNotifications = () => {
     fetch('/api/notifications')
@@ -32,6 +36,7 @@ export default function NotificationsPage() {
     for (const n of notifications.filter(n => !n.read)) {
       await fetch(`/api/notifications/${n.id}/read`, { method: 'PATCH' });
     }
+    toast.success('All caught up!', 'All notifications marked as read.');
     fetchNotifications();
   };
 
@@ -54,12 +59,12 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen">
       <Header title="Notifications" />
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 page-enter">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-semibold">Notifications</h2>
             {unreadCount > 0 && (
-              <Badge variant="destructive" className="text-xs">{unreadCount} unread</Badge>
+              <Badge variant="destructive" className="text-xs animate-pulse">{unreadCount} unread</Badge>
             )}
           </div>
           {unreadCount > 0 && (
@@ -70,14 +75,20 @@ export default function NotificationsPage() {
         </div>
 
         <div className="space-y-3">
-          {notifications.map(notification => (
+          {notifications.map((notification, i) => (
             <Card
               key={notification.id}
-              className={`transition-all duration-200 ${!notification.read ? 'border-primary/30 bg-primary/5' : 'opacity-75'}`}
+              className={cn(
+                'transition-all duration-200 opacity-0 animate-fade-in',
+                !notification.read
+                  ? 'border-primary/30 bg-primary/5 hover:bg-primary/8'
+                  : 'opacity-75 hover:opacity-100'
+              )}
+              style={{ animationDelay: `${i * 40}ms` }}
             >
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${getNotificationIcon(notification.type)} flex items-center justify-center text-white flex-shrink-0`}>
+                  <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${getNotificationIcon(notification.type)} flex items-center justify-center text-white flex-shrink-0 shadow-md`}>
                     <Bell className="h-5 w-5" />
                   </div>
                   <div>
@@ -98,10 +109,11 @@ export default function NotificationsPage() {
             </Card>
           ))}
           {notifications.length === 0 && (
-            <div className="text-center py-12">
-              <Bell className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
-              <p className="text-muted-foreground">No notifications yet</p>
-            </div>
+            <EmptyState
+              icon={Inbox}
+              title="No notifications yet"
+              description="You're all caught up! Notifications will appear here when there's activity."
+            />
           )}
         </div>
       </div>
