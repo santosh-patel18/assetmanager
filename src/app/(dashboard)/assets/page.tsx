@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
@@ -9,35 +9,47 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SkeletonTable } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
+import { LocationTreeSelect, type LocationNode } from '@/components/ui/location-tree-select';
 import { getStatusVariant } from '@/lib/utils';
+import { useFocusRefresh } from '@/lib/use-focus-refresh';
 import { useAuth } from '@/lib/auth-context';
 import { Package, Plus, Search, Eye } from 'lucide-react';
+import type { Asset, AssetCategory } from '@/types';
 
 export default function AssetsPage() {
   const { user } = useAuth();
-  const [assets, setAssets] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [categories, setCategories] = useState<AssetCategory[]>([]);
+  const [locations, setLocations] = useState<LocationNode[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [locationFilter, setLocationFilter] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchAssets = () => {
+  useEffect(() => {
+    document.title = 'Assets | AssetFlow';
+  }, []);
+
+  const fetchAssets = useCallback(() => {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (statusFilter) params.set('status', statusFilter);
     if (categoryFilter) params.set('category', categoryFilter);
+    if (locationFilter) params.set('locationId', locationFilter);
     fetch(`/api/assets?${params}`)
       .then(r => r.json())
       .then(d => { setAssets(d.assets || []); setLoading(false); });
-  };
+  }, [search, statusFilter, categoryFilter, locationFilter]);
 
   useEffect(() => {
     fetchAssets();
     fetch('/api/org/categories').then(r => r.json()).then(d => setCategories(d.categories || []));
+    fetch('/api/locations').then(r => r.json()).then(d => setLocations(d.locations || []));
   }, []);
 
-  useEffect(() => { const t = setTimeout(fetchAssets, 300); return () => clearTimeout(t); }, [search, statusFilter, categoryFilter]);
+  useEffect(() => { const t = setTimeout(fetchAssets, 300); return () => clearTimeout(t); }, [search, statusFilter, categoryFilter, locationFilter, fetchAssets]);
+  useFocusRefresh(fetchAssets);
 
   return (
     <div className="min-h-screen">
@@ -68,6 +80,13 @@ export default function AssetsPage() {
                 {categories.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
+            <LocationTreeSelect
+              locations={locations}
+              value={locationFilter}
+              onChange={setLocationFilter}
+              placeholder="All Locations"
+              className="w-[200px]"
+            />
           </div>
           {(user?.role === 'admin' || user?.role === 'asset_manager') && (
             <Link href="/assets/register">
@@ -118,7 +137,7 @@ export default function AssetsPage() {
                       <td className="p-3 text-sm font-medium">{asset.name}</td>
                       <td className="p-3 text-sm hidden md:table-cell">{asset.category?.name}</td>
                       <td className="p-3"><Badge variant={getStatusVariant(asset.status)} className="text-xs">{asset.status}</Badge></td>
-                      <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{asset.location || '—'}</td>
+                      <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{asset.locationRef?.name || asset.location || '—'}</td>
                       <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{asset.department?.name || '—'}</td>
                       <td className="p-3">
                         <Link href={`/assets/${asset.id}`}>

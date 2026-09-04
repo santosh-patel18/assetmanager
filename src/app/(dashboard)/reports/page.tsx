@@ -1,28 +1,109 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SkeletonCard } from '@/components/ui/skeleton';
 import { BarChart3, Download, Package, Wrench, Building2, CalendarDays } from 'lucide-react';
+import { LocationTreeSelect, type LocationNode } from '@/components/ui/location-tree-select';
+import { useFocusRefresh } from '@/lib/use-focus-refresh';
+
+// ─── Report-specific interfaces ─────────────────────────────────
+interface StatusCount {
+  status: string;
+  _count: { id: number };
+}
+
+interface UtilizationItem {
+  id: string;
+  name: string;
+  assetTag: string;
+  allocation_count: number;
+}
+
+interface UtilizationData {
+  statusCounts: StatusCount[];
+  utilization: UtilizationItem[];
+}
+
+interface PriorityItem {
+  priority: string;
+  _count: { id: number };
+}
+
+interface MaintenanceItem {
+  id: string;
+  name: string;
+  assetTag: string;
+  category?: { name: string };
+  request_count: number;
+}
+
+interface MaintenanceData {
+  priorityDistribution: PriorityItem[];
+  data: MaintenanceItem[];
+}
+
+interface DeptAllocItem {
+  id: string;
+  name: string;
+  status: string;
+  active_allocations: number;
+  _count?: { employees?: number; assets?: number };
+}
+
+interface DeptAllocData {
+  data: DeptAllocItem[];
+}
+
+interface BookingHeatmapData {
+  heatmap: number[][];
+  totalBookings: number;
+}
 
 export default function ReportsPage() {
-  const [utilization, setUtilization] = useState<any>(null);
-  const [maintenance, setMaintenance] = useState<any>(null);
-  const [deptAlloc, setDeptAlloc] = useState<any>(null);
-  const [bookingHeatmap, setBookingHeatmap] = useState<any>(null);
+  const [utilization, setUtilization] = useState<UtilizationData | null>(null);
+  const [maintenance, setMaintenance] = useState<MaintenanceData | null>(null);
+  const [deptAlloc, setDeptAlloc] = useState<DeptAllocData | null>(null);
+  const [bookingHeatmap, setBookingHeatmap] = useState<BookingHeatmapData | null>(null);
+  const [locations, setLocations] = useState<LocationNode[]>([]);
+  const [locationFilter, setLocationFilter] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/reports/utilization').then(r => r.json()).then(setUtilization);
-    fetch('/api/reports/maintenance-frequency').then(r => r.json()).then(setMaintenance);
-    fetch('/api/reports/department-allocation').then(r => r.json()).then(setDeptAlloc);
-    fetch('/api/reports/booking-heatmap').then(r => r.json()).then(setBookingHeatmap);
+    document.title = 'Reports | AssetFlow';
   }, []);
 
+  const fetchReports = useCallback(() => {
+    setLoading(true);
+    const params = locationFilter ? `?locationId=${locationFilter}` : '';
+    Promise.all([
+      fetch(`/api/reports/utilization${params}`).then(r => r.json()),
+      fetch(`/api/reports/maintenance-frequency${params}`).then(r => r.json()),
+      fetch(`/api/reports/department-allocation${params}`).then(r => r.json()),
+      fetch(`/api/reports/booking-heatmap${params}`).then(r => r.json()),
+    ]).then(([u, m, d, b]) => {
+      setUtilization(u);
+      setMaintenance(m);
+      setDeptAlloc(d);
+      setBookingHeatmap(b);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, [locationFilter]);
+
+  useEffect(() => { fetchReports(); }, [fetchReports]);
+  useEffect(() => {
+    fetch('/api/locations').then(r => r.json()).then(d => setLocations(d.locations || []));
+  }, []);
+  useFocusRefresh(fetchReports);
+
   const handleExport = () => {
-    window.open('/api/reports/export?type=csv', '_blank');
+    const params = new URLSearchParams({ type: 'csv' });
+    if (locationFilter) params.set('locationId', locationFilter);
+    window.open(`/api/reports/export?${params}`, '_blank');
   };
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -30,9 +111,20 @@ export default function ReportsPage() {
   return (
     <div className="min-h-screen">
       <Header title="Reports & Analytics" />
-      <div className="p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Reports Dashboard</h2>
+      <div className="p-6 space-y-6 page-enter">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-semibold">Reports Dashboard</h2>
+            {locations.length > 0 && (
+              <LocationTreeSelect
+                locations={locations}
+                value={locationFilter}
+                onChange={setLocationFilter}
+                placeholder="All Locations"
+                className="w-[220px]"
+              />
+            )}
+          </div>
           <Button onClick={handleExport} variant="outline" className="gap-2">
             <Download className="h-4 w-4" /> Export CSV
           </Button>
@@ -53,7 +145,7 @@ export default function ReportsPage() {
               <CardHeader><CardTitle className="text-base">Asset Status Distribution</CardTitle></CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-4">
-                  {utilization?.statusCounts?.map((sc: any) => {
+                  {utilization?.statusCounts?.map((sc) => {
                     const colors: Record<string, string> = {
                       Available: 'from-emerald-500 to-emerald-600',
                       Allocated: 'from-blue-500 to-blue-600',
@@ -81,9 +173,9 @@ export default function ReportsPage() {
             <Card>
               <CardHeader><CardTitle className="text-base">Most Allocated Assets (Top 10)</CardTitle></CardHeader>
               <CardContent>
-                {utilization?.utilization?.length > 0 ? (
+                {(utilization?.utilization?.length ?? 0) > 0 ? (
                   <div className="space-y-3">
-                    {utilization.utilization.map((u: any, i: number) => (
+                    {utilization!.utilization.map((u, i) => (
                       <div key={u.id || i} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                         <div className="flex items-center gap-3">
                           <span className="text-xs text-muted-foreground font-mono w-6">#{i + 1}</span>
@@ -113,7 +205,7 @@ export default function ReportsPage() {
               <CardHeader><CardTitle className="text-base">Request Priority Distribution</CardTitle></CardHeader>
               <CardContent>
                 <div className="flex gap-4">
-                  {maintenance?.priorityDistribution?.map((p: any) => {
+                  {maintenance?.priorityDistribution?.map((p) => {
                     const colors: Record<string, string> = {
                       low: 'from-slate-500 to-slate-600',
                       medium: 'from-amber-500 to-amber-600',
@@ -139,9 +231,9 @@ export default function ReportsPage() {
             <Card>
               <CardHeader><CardTitle className="text-base">Most Maintained Assets (Top 20)</CardTitle></CardHeader>
               <CardContent>
-                {maintenance?.data?.length > 0 ? (
+                {(maintenance?.data?.length ?? 0) > 0 ? (
                   <div className="space-y-3">
-                    {maintenance.data.map((m: any, i: number) => (
+                    {maintenance!.data.map((m, i) => (
                       <div key={m.id || i} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                         <div className="flex items-center gap-3">
                           <span className="text-xs text-muted-foreground font-mono w-6">#{i + 1}</span>
@@ -175,7 +267,7 @@ export default function ReportsPage() {
                     <th className="text-left p-3 text-sm font-medium">Status</th>
                   </tr></thead>
                   <tbody>
-                    {deptAlloc?.data?.map((d: any) => (
+                    {deptAlloc?.data?.map((d) => (
                       <tr key={d.id} className="border-t hover:bg-muted/30 transition-colors">
                         <td className="p-3 text-sm font-medium">{d.name}</td>
                         <td className="p-3 text-sm">{d._count?.employees || 0}</td>

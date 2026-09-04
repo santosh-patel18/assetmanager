@@ -10,12 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { getStatusVariant, formatDate } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
 import { Lock } from 'lucide-react';
+import type { AuditCycle } from '@/types';
 
 export default function AuditCycleDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const [cycle, setCycle] = useState<any>(null);
+  const [cycle, setCycle] = useState<AuditCycle | null>(null);
   const [resolutions, setResolutions] = useState<Record<string, string>>({});
 
   useEffect(() => {

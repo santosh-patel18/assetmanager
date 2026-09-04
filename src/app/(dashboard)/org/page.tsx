@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,21 +10,28 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Plus, Building2, Tags, Users, Edit, UserCheck, UserX, Clock, Copy, Check, X, Trash2, ArrowRightLeft } from 'lucide-react';
+import { SkeletonCard } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useToast } from '@/components/ui/toast-notification';
+import { Plus, Building2, Tags, Users, Edit, UserCheck, UserX, Clock, Copy, Check, X, Trash2, ArrowRightLeft, Inbox, Loader2 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { useFocusRefresh } from '@/lib/use-focus-refresh';
 import { useAuth } from '@/lib/auth-context';
+import type { Department, AssetCategory, Employee } from '@/types';
 
 export default function OrgPage() {
   const { user } = useAuth();
+  const toast = useToast();
   const isAdmin = user?.role === 'admin';
   const isDeptHead = user?.role === 'department_head';
-  const [departments, setDepartments] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [employees, setEmployees] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [categories, setCategories] = useState<AssetCategory[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [showDeptDialog, setShowDeptDialog] = useState(false);
   const [showCatDialog, setShowCatDialog] = useState(false);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [newRole, setNewRole] = useState('');
   const [showDeptAssignDialog, setShowDeptAssignDialog] = useState(false);
   const [assignDeptId, setAssignDeptId] = useState('');
@@ -32,10 +39,17 @@ export default function OrgPage() {
   const [catForm, setCatForm] = useState({ name: '' });
   const [catFields, setCatFields] = useState<{ name: string; type: string; required: boolean }[]>([{ name: '', type: 'string', required: false }]);
   const [loading, setLoading] = useState(true);
-  const [pendingRegistrations, setPendingRegistrations] = useState<any[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [pendingRegistrations, setPendingRegistrations] = useState<Employee[]>([]);
   const [approvedPassword, setApprovedPassword] = useState<{ name: string; email: string; password: string } | null>(null);
+  // Confirm dialog state
+  const [confirmState, setConfirmState] = useState<{ open: boolean; title: string; description: string; onConfirm: () => Promise<void> }>({ open: false, title: '', description: '', onConfirm: async () => {} });
 
-  const fetchAll = () => {
+  useEffect(() => {
+    document.title = 'Organization | AssetFlow';
+  }, []);
+
+  const fetchAll = useCallback(() => {
     Promise.all([
       fetch('/api/org/departments').then(r => r.json()),
       fetch('/api/org/categories').then(r => r.json()),
@@ -44,53 +58,74 @@ export default function OrgPage() {
       setDepartments(d.departments || []);
       setCategories(c.categories || []);
       const allEmployees = e.employees || [];
-      setEmployees(allEmployees.filter((emp: any) => emp.status !== 'Pending'));
-      setPendingRegistrations(allEmployees.filter((emp: any) => emp.status === 'Pending'));
+      setEmployees(allEmployees.filter((emp: Employee) => emp.status !== 'Pending'));
+      setPendingRegistrations(allEmployees.filter((emp: Employee) => emp.status === 'Pending'));
       setLoading(false);
     });
-  };
+  }, []);
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useFocusRefresh(fetchAll);
 
   const approveRegistration = async (id: string) => {
-    const res = await fetch(`/api/org/registrations/${id}/approve`, { method: 'PATCH' });
-    const data = await res.json();
-    if (res.ok) {
-      setApprovedPassword({ name: data.employee.name, email: data.employee.email, password: data.generated_password });
-      fetchAll();
-    } else {
-      alert(data.error || 'Failed to approve');
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/org/registrations/${id}/approve`, { method: 'PATCH' });
+      const data = await res.json();
+      if (res.ok) {
+        setApprovedPassword({ name: data.employee.name, email: data.employee.email, password: data.generated_password });
+        toast.success('Registration Approved', `${data.employee.name} has been approved.`);
+        fetchAll();
+      } else {
+        toast.error('Approval Failed', data.error || 'Failed to approve');
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const rejectRegistration = async (id: string) => {
-    if (!confirm('Are you sure you want to reject this registration? This will permanently delete the request.')) return;
-    await fetch(`/api/org/registrations/${id}/reject`, { method: 'PATCH' });
-    fetchAll();
+    setConfirmState({
+      open: true,
+      title: 'Reject Registration',
+      description: 'Are you sure you want to reject this registration? This will permanently delete the request.',
+      onConfirm: async () => {
+        await fetch(`/api/org/registrations/${id}/reject`, { method: 'PATCH' });
+        toast.warning('Registration Rejected', 'The registration request has been rejected.');
+        fetchAll();
+      },
+    });
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+    toast.success('Copied', 'Credentials copied to clipboard.');
   };
 
   const createDepartment = async () => {
-    await fetch('/api/org/departments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: deptForm.name,
-        parent_department_id: deptForm.parent_department_id || null,
-        head_employee_id: deptForm.head_employee_id || null,
-      }),
-    });
-    setShowDeptDialog(false);
-    setDeptForm({ name: '', parent_department_id: '', head_employee_id: '' });
-    fetchAll();
+    setSubmitting(true);
+    try {
+      await fetch('/api/org/departments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: deptForm.name,
+          parent_department_id: deptForm.parent_department_id || null,
+          head_employee_id: deptForm.head_employee_id || null,
+        }),
+      });
+      toast.success('Department Created', `${deptForm.name} has been created.`);
+      setShowDeptDialog(false);
+      setDeptForm({ name: '', parent_department_id: '', head_employee_id: '' });
+      fetchAll();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const createCategory = async () => {
     // Convert fields array into schema object
-    const schema: Record<string, any> = {};
+    const schema: Record<string, { type: string; required?: boolean }> = {};
     catFields.forEach(f => {
       if (f.name.trim()) {
         const key = f.name.trim().toLowerCase().replace(/\s+/g, '_');
@@ -98,28 +133,35 @@ export default function OrgPage() {
         if (f.required) schema[key].required = true;
       }
     });
-    const res = await fetch('/api/org/categories', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: catForm.name, field_schema: schema }),
-    });
-    const data = await res.json();
-    if (res.ok && data.message) {
-      alert(data.message);
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/org/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: catForm.name, field_schema: schema }),
+      });
+      const data = await res.json();
+      if (res.ok && data.message) {
+        toast.success('Category Created', data.message);
+      } else if (res.ok) {
+        toast.success('Category Created', `${catForm.name} has been created.`);
+      }
+      setShowCatDialog(false);
+      setCatForm({ name: '' });
+      setCatFields([{ name: '', type: 'string', required: false }]);
+      fetchAll();
+    } finally {
+      setSubmitting(false);
     }
-    setShowCatDialog(false);
-    setCatForm({ name: '' });
-    setCatFields([{ name: '', type: 'string', required: false }]);
-    fetchAll();
   };
 
   const addCatField = () => {
     setCatFields([...catFields, { name: '', type: 'string', required: false }]);
   };
 
-  const updateCatField = (index: number, key: string, value: any) => {
+  const updateCatField = (index: number, key: string, value: string | boolean) => {
     const updated = [...catFields];
-    (updated[index] as any)[key] = value;
+    (updated[index] as Record<string, string | boolean>)[key] = value;
     setCatFields(updated);
   };
 
@@ -130,25 +172,53 @@ export default function OrgPage() {
 
   const changeRole = async () => {
     if (!selectedEmployee || !newRole) return;
-    const res = await fetch(`/api/org/employees/${selectedEmployee.id}/role`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role: newRole }),
-    });
-    if (!res.ok) {
-      const data = await res.json();
-      alert(data.error || 'Failed to change role');
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/org/employees/${selectedEmployee.id}/role`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error('Role Change Failed', data.error || 'Failed to change role');
+      } else {
+        toast.success('Role Updated', `${selectedEmployee.name}'s role has been updated.`);
+      }
+      setShowRoleDialog(false);
+      setSelectedEmployee(null);
+      setNewRole('');
+      fetchAll();
+    } finally {
+      setSubmitting(false);
     }
-    setShowRoleDialog(false);
-    setSelectedEmployee(null);
-    setNewRole('');
-    fetchAll();
   };
 
   return (
     <div className="min-h-screen">
       <Header title="Organization Setup" />
-      <div className="p-6">
+      <div className="p-6 page-enter">
+        {/* Shared Confirm Dialog */}
+        <ConfirmDialog
+          open={confirmState.open}
+          onOpenChange={(open) => setConfirmState(prev => ({ ...prev, open }))}
+          title={confirmState.title}
+          description={confirmState.description}
+          confirmText="Yes, proceed"
+          variant="destructive"
+          onConfirm={confirmState.onConfirm}
+        />
+
+        {loading ? (
+          <div className="space-y-4">
+            <div className="h-10 w-64 rounded bg-muted animate-pulse" />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} className="h-32" />
+              ))}
+            </div>
+          </div>
+        ) : (
         <Tabs defaultValue={pendingRegistrations.length > 0 ? 'pending' : (isAdmin ? 'departments' : 'categories')} className="space-y-6">
           <TabsList className={`grid w-full max-w-2xl ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="pending" className="gap-2 relative">
@@ -206,8 +276,8 @@ export default function OrgPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant="warning" className="text-xs">Pending</Badge>
-                        <Button variant="outline" size="sm" className="gap-1 h-8 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => approveRegistration(reg.id)}>
-                          <UserCheck className="h-3 w-3" /> Approve
+                        <Button variant="outline" size="sm" className="gap-1 h-8 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => approveRegistration(reg.id)} disabled={submitting}>
+                          {submitting ? <Loader2 className="h-3 w-3 animate-spin" /> : <UserCheck className="h-3 w-3" />} Approve
                         </Button>
                         <Button variant="ghost" size="sm" className="gap-1 h-8 text-destructive" onClick={() => rejectRegistration(reg.id)}>
                           <UserX className="h-3 w-3" /> Reject
@@ -218,10 +288,12 @@ export default function OrgPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <UserCheck className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
-                <p className="text-muted-foreground">No pending registration requests</p>
-              </div>
+              <EmptyState
+                icon={Inbox}
+                title="No pending requests"
+                description="No pending registration requests to review."
+                className="py-12"
+              />
             )}
           </TabsContent>
 
@@ -231,23 +303,27 @@ export default function OrgPage() {
               <h2 className="text-xl font-semibold">Departments</h2>
               <Button onClick={() => setShowDeptDialog(true)} className="gap-2"><Plus className="h-4 w-4" /> Add Department</Button>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {departments.map(dept => (
-                <Card key={dept.id} className="hover:border-primary/50 transition-colors">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">{dept.name}</CardTitle>
-                      <Badge variant={dept.status === 'Active' ? 'success' : 'secondary'}>{dept.status}</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-sm">
-                    {dept.parent && <p className="text-muted-foreground">Parent: {dept.parent.name}</p>}
-                    {dept.headEmployee && <p className="text-muted-foreground">Head: {dept.headEmployee.name}</p>}
-                    <p className="text-muted-foreground">{dept._count?.employees || 0} employees · {dept._count?.assets || 0} assets</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {departments.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {departments.map(dept => (
+                  <Card key={dept.id} className="hover:border-primary/50 transition-colors">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base">{dept.name}</CardTitle>
+                        <Badge variant={dept.status === 'Active' ? 'success' : 'secondary'}>{dept.status}</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-2 text-sm">
+                      {dept.parent && <p className="text-muted-foreground">Parent: {dept.parent.name}</p>}
+                      {dept.headEmployee && <p className="text-muted-foreground">Head: {dept.headEmployee.name}</p>}
+                      <p className="text-muted-foreground">{dept._count?.employees || 0} employees · {dept._count?.assets || 0} assets</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <EmptyState icon={Building2} title="No departments" description="Create your first department to get started." className="py-12" />
+            )}
           </TabsContent>
 
           {/* Categories Tab */}
@@ -256,91 +332,111 @@ export default function OrgPage() {
               <h2 className="text-xl font-semibold">Asset Categories</h2>
               <Button onClick={() => setShowCatDialog(true)} className="gap-2"><Plus className="h-4 w-4" /> Add Category</Button>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {categories.map(cat => (
-                <Card key={cat.id} className={`hover:border-primary/50 transition-colors ${cat.status === 'Pending' ? 'border-amber-500/30' : ''}`}>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">{cat.name}</CardTitle>
-                      <Badge variant={cat.status === 'Active' ? 'success' : cat.status === 'Pending' ? 'warning' : 'secondary'}>{cat.status}</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    <p>{cat._count?.assets || 0} assets</p>
-                    {cat.fieldSchema && Object.keys(cat.fieldSchema as object).length > 0 && (
-                      <p className="mt-1 text-xs">Fields: {Object.keys(cat.fieldSchema as object).join(', ')}</p>
-                    )}
-                    {cat.status === 'Pending' && isAdmin && (
-                      <div className="flex gap-2 mt-3">
-                        <Button variant="outline" size="sm" className="gap-1 h-7 text-xs text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10" onClick={async () => { await fetch(`/api/org/categories/${cat.id}`, { method: 'PATCH' }); fetchAll(); }}>
-                          <Check className="h-3 w-3" /> Approve
-                        </Button>
-                        <Button variant="ghost" size="sm" className="gap-1 h-7 text-xs text-destructive" onClick={async () => { if (confirm('Reject this category?')) { await fetch(`/api/org/categories/${cat.id}`, { method: 'DELETE' }); fetchAll(); } }}>
-                          <X className="h-3 w-3" /> Reject
-                        </Button>
+            {categories.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {categories.map(cat => (
+                  <Card key={cat.id} className={`hover:border-primary/50 transition-colors ${cat.status === 'Pending' ? 'border-amber-500/30' : ''}`}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base">{cat.name}</CardTitle>
+                        <Badge variant={cat.status === 'Active' ? 'success' : cat.status === 'Pending' ? 'warning' : 'secondary'}>{cat.status}</Badge>
                       </div>
-                    )}
-                    {cat.status === 'Pending' && isDeptHead && (
-                      <p className="text-xs text-amber-400 mt-2">⏳ Awaiting admin approval</p>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardHeader>
+                    <CardContent className="text-sm text-muted-foreground">
+                      <p>{cat._count?.assets || 0} assets</p>
+                      {cat.fieldSchema && Object.keys(cat.fieldSchema as object).length > 0 && (
+                        <p className="mt-1 text-xs">Fields: {Object.keys(cat.fieldSchema as object).join(', ')}</p>
+                      )}
+                      {cat.status === 'Pending' && isAdmin && (
+                        <div className="flex gap-2 mt-3">
+                          <Button variant="outline" size="sm" className="gap-1 h-7 text-xs text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10" onClick={async () => { await fetch(`/api/org/categories/${cat.id}`, { method: 'PATCH' }); toast.success('Category Approved', `${cat.name} has been approved.`); fetchAll(); }}>
+                            <Check className="h-3 w-3" /> Approve
+                          </Button>
+                          <Button variant="ghost" size="sm" className="gap-1 h-7 text-xs text-destructive" onClick={() => {
+                            setConfirmState({
+                              open: true,
+                              title: 'Reject Category',
+                              description: `Are you sure you want to reject "${cat.name}"? This action cannot be undone.`,
+                              onConfirm: async () => {
+                                await fetch(`/api/org/categories/${cat.id}`, { method: 'DELETE' });
+                                toast.warning('Category Rejected', `${cat.name} has been rejected.`);
+                                fetchAll();
+                              },
+                            });
+                          }}>
+                            <X className="h-3 w-3" /> Reject
+                          </Button>
+                        </div>
+                      )}
+                      {cat.status === 'Pending' && isDeptHead && (
+                        <p className="text-xs text-amber-400 mt-2">⏳ Awaiting admin approval</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <EmptyState icon={Tags} title="No categories" description="Create asset categories to organize your assets." className="py-12" />
+            )}
           </TabsContent>
 
           {/* Employees Tab */}
           <TabsContent value="employees" className="space-y-4">
             <h2 className="text-xl font-semibold">Employee Directory</h2>
-            <div className="border rounded-lg overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="text-left p-3 text-sm font-medium">Name</th>
-                    <th className="text-left p-3 text-sm font-medium">Email</th>
-                    <th className="text-left p-3 text-sm font-medium">Department</th>
-                    <th className="text-left p-3 text-sm font-medium">Role</th>
-                    <th className="text-left p-3 text-sm font-medium">Status</th>
-                    <th className="text-left p-3 text-sm font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {employees.map(emp => (
-                    <tr key={emp.id} className="border-t hover:bg-muted/30 transition-colors">
-                      <td className="p-3 text-sm font-medium">{emp.name}</td>
-                      <td className="p-3 text-sm text-muted-foreground">{emp.email}</td>
-                      <td className="p-3 text-sm">{emp.department?.name || '—'}</td>
-                      <td className="p-3"><Badge variant="outline" className="capitalize text-xs">{emp.role.replace('_', ' ')}</Badge></td>
-                      <td className="p-3"><Badge variant={emp.status === 'Active' ? 'success' : 'secondary'} className="text-xs">{emp.status}</Badge></td>
-                      <td className="p-3">
-                        {isAdmin && (
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => { setSelectedEmployee(emp); setNewRole(emp.role); setShowRoleDialog(true); }}
-                              className="gap-1 h-8"
-                            >
-                              <Edit className="h-3 w-3" /> Role
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => { setSelectedEmployee(emp); setAssignDeptId(emp.departmentId || ''); setShowDeptAssignDialog(true); }}
-                              className="gap-1 h-8"
-                            >
-                              <ArrowRightLeft className="h-3 w-3" /> Dept
-                            </Button>
-                          </div>
-                        )}
-                      </td>
+            {employees.length > 0 ? (
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="text-left p-3 text-sm font-medium">Name</th>
+                      <th className="text-left p-3 text-sm font-medium">Email</th>
+                      <th className="text-left p-3 text-sm font-medium">Department</th>
+                      <th className="text-left p-3 text-sm font-medium">Role</th>
+                      <th className="text-left p-3 text-sm font-medium">Status</th>
+                      <th className="text-left p-3 text-sm font-medium">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {employees.map(emp => (
+                      <tr key={emp.id} className="border-t hover:bg-muted/30 transition-colors">
+                        <td className="p-3 text-sm font-medium">{emp.name}</td>
+                        <td className="p-3 text-sm text-muted-foreground">{emp.email}</td>
+                        <td className="p-3 text-sm">{emp.department?.name || '—'}</td>
+                        <td className="p-3"><Badge variant="outline" className="capitalize text-xs">{emp.role.replace('_', ' ')}</Badge></td>
+                        <td className="p-3"><Badge variant={emp.status === 'Active' ? 'success' : 'secondary'} className="text-xs">{emp.status}</Badge></td>
+                        <td className="p-3">
+                          {isAdmin && (
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => { setSelectedEmployee(emp); setNewRole(emp.role); setShowRoleDialog(true); }}
+                                className="gap-1 h-8"
+                              >
+                                <Edit className="h-3 w-3" /> Role
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => { setSelectedEmployee(emp); setAssignDeptId(emp.departmentId || ''); setShowDeptAssignDialog(true); }}
+                                className="gap-1 h-8"
+                              >
+                                <ArrowRightLeft className="h-3 w-3" /> Dept
+                              </Button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <EmptyState icon={Users} title="No employees" description="Employees will appear here once registered." className="py-12" />
+            )}
           </TabsContent>
         </Tabs>
+        )}
 
         {/* Department Dialog */}
         <Dialog open={showDeptDialog} onOpenChange={setShowDeptDialog}>
@@ -361,7 +457,7 @@ export default function OrgPage() {
                 </Select>
               </div>
             </div>
-            <DialogFooter><Button onClick={createDepartment}>Create</Button></DialogFooter>
+            <DialogFooter><Button onClick={createDepartment} disabled={submitting} className="gap-2">{submitting && <Loader2 className="h-4 w-4 animate-spin" />}Create</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -417,7 +513,8 @@ export default function OrgPage() {
               )}
             </div>
             <DialogFooter>
-              <Button onClick={createCategory} disabled={!catForm.name.trim()}>
+              <Button onClick={createCategory} disabled={!catForm.name.trim() || submitting} className="gap-2">
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isDeptHead ? 'Submit for Approval' : 'Create'}
               </Button>
             </DialogFooter>
@@ -440,7 +537,7 @@ export default function OrgPage() {
                 </SelectContent>
               </Select>
             </div>
-            <DialogFooter><Button onClick={changeRole}>Save</Button></DialogFooter>
+            <DialogFooter><Button onClick={changeRole} disabled={submitting} className="gap-2">{submitting && <Loader2 className="h-4 w-4 animate-spin" />}Save</Button></DialogFooter>
           </DialogContent>
         </Dialog>
         {/* Department Assignment Dialog */}
@@ -461,20 +558,27 @@ export default function OrgPage() {
             </div>
             <DialogFooter>
               <Button
-                disabled={!assignDeptId}
+                disabled={!assignDeptId || submitting}
+                className="gap-2"
                 onClick={async () => {
                   if (!selectedEmployee) return;
-                  await fetch(`/api/org/employees/${selectedEmployee.id}/department`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ departmentId: assignDeptId }),
-                  });
-                  setShowDeptAssignDialog(false);
-                  setSelectedEmployee(null);
-                  setAssignDeptId('');
-                  fetchAll();
+                  setSubmitting(true);
+                  try {
+                    await fetch(`/api/org/employees/${selectedEmployee.id}/department`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ departmentId: assignDeptId }),
+                    });
+                    toast.success('Department Assigned', `${selectedEmployee.name} has been assigned.`);
+                    setShowDeptAssignDialog(false);
+                    setSelectedEmployee(null);
+                    setAssignDeptId('');
+                    fetchAll();
+                  } finally {
+                    setSubmitting(false);
+                  }
                 }}
-              >Assign</Button>
+              >{submitting && <Loader2 className="h-4 w-4 animate-spin" />}Assign</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

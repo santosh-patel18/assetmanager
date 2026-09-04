@@ -156,6 +156,9 @@ module.exports = {
         "toast-out": "slide-out-right 0.3s ease-in",
         "count-up": "count-up 0.6s ease-out forwards",
       },
+      transitionTimingFunction: {
+        "smooth": "cubic-bezier(0.4, 0, 0.2, 1)",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

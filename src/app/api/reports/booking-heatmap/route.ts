@@ -7,15 +7,23 @@ export async function GET(request: Request) {
     const user = await getCurrentUserFromHeader(request);
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Get bookings from last 30 days, grouped by hour of day and day of week
+    const { searchParams } = new URL(request.url);
+    const locationId = searchParams.get('locationId');
+
+    // Get bookings from last 30 days, optionally filtered by resource location
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+    const bookingWhere: Record<string, unknown> = {
+      startTime: { gte: thirtyDaysAgo },
+      status: { not: 'Cancelled' },
+    };
+    if (locationId) {
+      bookingWhere.resource = { locationId };
+    }
+
     const bookings = await prisma.resourceBooking.findMany({
-      where: {
-        startTime: { gte: thirtyDaysAgo },
-        status: { not: 'Cancelled' },
-      },
+      where: bookingWhere,
       select: { startTime: true, endTime: true, resourceId: true },
     });
 

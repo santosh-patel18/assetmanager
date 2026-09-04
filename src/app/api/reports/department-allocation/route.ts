@@ -7,12 +7,24 @@ export async function GET(request: Request) {
     const user = await getCurrentUserFromHeader(request);
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    const { searchParams } = new URL(request.url);
+    const locationId = searchParams.get('locationId');
+
+    // Scope assets count by location
+    const assetWhere: Record<string, unknown> = {};
+    if (locationId) assetWhere.locationId = locationId;
+
     const departments = await prisma.department.findMany({
       select: {
         id: true,
         name: true,
         status: true,
-        _count: { select: { assets: true, employees: true } },
+        _count: {
+          select: {
+            assets: locationId ? { where: { locationId } } : true,
+            employees: true,
+          },
+        },
       },
       orderBy: { name: 'asc' },
     });
@@ -20,7 +32,11 @@ export async function GET(request: Request) {
     // Get allocation counts by department
     const deptAllocations = await prisma.allocation.groupBy({
       by: ['targetId'],
-      where: { targetType: 'department', status: 'Active' },
+      where: {
+        targetType: 'department',
+        status: 'Active',
+        ...(locationId ? { asset: { locationId } } : {}),
+      },
       _count: { id: true },
     });
 

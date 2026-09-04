@@ -14,11 +14,13 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
     const priority = searchParams.get('priority');
     const assetId = searchParams.get('asset_id');
+    const locationId = searchParams.get('locationId');
 
     const where: Record<string, unknown> = {};
     if (status) where.status = status;
     if (priority) where.priority = priority;
     if (assetId) where.assetId = assetId;
+    if (locationId) where.asset = { locationId };
 
     const requests = await prisma.maintenanceRequest.findMany({
       where,

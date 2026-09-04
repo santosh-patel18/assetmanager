@@ -7,8 +7,18 @@ export async function GET(request: Request) {
     const user = await getCurrentUserFromHeader(request);
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    const { searchParams } = new URL(request.url);
+    const locationId = searchParams.get('locationId');
+
+    // Scope maintenance requests by asset's location
+    const maintenanceWhere: Record<string, unknown> = {};
+    if (locationId) {
+      maintenanceWhere.asset = { locationId };
+    }
+
     const frequency = await prisma.maintenanceRequest.groupBy({
       by: ['assetId'],
+      where: maintenanceWhere,
       _count: { id: true },
       orderBy: { _count: { id: 'desc' } },
       take: 20,
@@ -25,9 +35,10 @@ export async function GET(request: Request) {
       request_count: f._count.id,
     }));
 
-    // Priority distribution
+    // Priority distribution (scoped)
     const priorityDist = await prisma.maintenanceRequest.groupBy({
       by: ['priority'],
+      where: maintenanceWhere,
       _count: { id: true },
     });
 

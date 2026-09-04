@@ -17,6 +17,7 @@ export async function GET(
       include: {
         category: true,
         department: { select: { id: true, name: true } },
+        locationRef: { select: { id: true, name: true, code: true, type: true } },
         allocations: {
           include: {
             allocator: { select: { id: true, name: true } },
@@ -87,6 +88,7 @@ export async function PATCH(
     if (data.acquisition_cost !== undefined) updateData.acquisitionCost = data.acquisition_cost;
     if (data.condition !== undefined) updateData.condition = data.condition;
     if (data.location !== undefined) updateData.location = data.location;
+    if (data.location_id !== undefined) updateData.locationId = data.location_id;
     if (data.department_id !== undefined) updateData.departmentId = data.department_id;
     if (data.is_bookable !== undefined) updateData.isBookable = data.is_bookable;
     if (data.attributes !== undefined) updateData.attributes = data.attributes;
@@ -99,6 +101,7 @@ export async function PATCH(
       include: {
         category: { select: { id: true, name: true } },
         department: { select: { id: true, name: true } },
+        locationRef: { select: { id: true, name: true, code: true, type: true } },
       },
     });
 

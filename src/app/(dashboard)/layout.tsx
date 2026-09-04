@@ -66,7 +66,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen">
       <Sidebar />
       <main className={cn(
-        'flex-1 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+        'flex-1 transition-all duration-300 ease-smooth',
         // Desktop: margin matches sidebar width
         'md:ml-[260px]',
         sidebarCollapsed && 'md:ml-[68px]',

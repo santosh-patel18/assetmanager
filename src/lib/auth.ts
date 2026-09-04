@@ -190,6 +190,30 @@ export async function getDepartmentScope(userId: string): Promise<string[]> {
   return result.map(r => r.id);
 }
 
+/**
+ * Get the location scope for a user.
+ * Returns all location IDs the user has authority over (their home location + all descendants).
+ * Returns empty array if the user has no home location assigned (= global access).
+ */
+export async function getLocationScope(userId: string): Promise<string[]> {
+  const employee = await prisma.employee.findUnique({
+    where: { id: userId },
+    select: { locationId: true },
+  });
+  if (!employee?.locationId) return []; // No location = global (no restriction)
+
+  const result = await prisma.$queryRaw<{ id: string }[]>`
+    WITH RECURSIVE loc_tree AS (
+      SELECT id, parent_id FROM locations WHERE id = ${employee.locationId}::uuid
+      UNION ALL
+      SELECT l.id, l.parent_id
+      FROM locations l JOIN loc_tree lt ON l.parent_id = lt.id
+    )
+    SELECT id FROM loc_tree
+  `;
+  return result.map(r => r.id);
+}
+
 export function setTokenCookie(token: string): string {
   const secure = IS_PRODUCTION ? '; Secure' : '';
   const sameSite = IS_PRODUCTION ? 'Strict' : 'Lax';

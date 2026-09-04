@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { getCurrentUserFromHeader, verifyRoleFromDB } from '@/lib/auth';
+import { getCurrentUserFromHeader, verifyRoleFromDB, getDepartmentScope, getLocationScope } from '@/lib/auth';
 import { createAssetSchema, validateAttributesAgainstSchema } from '@/lib/validations/assets';
 import { generateAssetTag } from '@/lib/server-utils';
 import { logActivity } from '@/lib/activity-logger';
@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
     const department = searchParams.get('department');
     const location = searchParams.get('location');
+    const locationId = searchParams.get('locationId');
     const bookable = searchParams.get('bookable');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
@@ -33,7 +34,27 @@ export async function GET(request: Request) {
     if (status) where.status = status;
     if (department) where.departmentId = department;
     if (location) where.location = { contains: location, mode: 'insensitive' };
+    if (locationId) where.locationId = locationId;
     if (bookable === 'true') where.isBookable = true;
+
+    // Custom field search: ?customField=key:value
+    const customField = searchParams.get('customField');
+    if (customField && customField.includes(':')) {
+      const [cfKey, ...cfValParts] = customField.split(':');
+      const cfValue = cfValParts.join(':'); // handle colons in value
+      if (cfKey && cfValue) {
+        where.attributes = { path: [cfKey], string_contains: cfValue };
+      }
+    }
+
+    // Apply location-scoped RBAC for department_head
+    const dbRole = await verifyRoleFromDB(user.userId);
+    if (dbRole === 'department_head') {
+      const deptIds = await getDepartmentScope(user.userId);
+      if (deptIds.length > 0) where.departmentId = { in: deptIds };
+      const locIds = await getLocationScope(user.userId);
+      if (locIds.length > 0) where.locationId = { ...(typeof where.locationId === 'object' ? where.locationId : {}), in: locIds };
+    }
 
     const [assets, total] = await Promise.all([
       prisma.asset.findMany({
@@ -41,6 +62,7 @@ export async function GET(request: Request) {
         include: {
           category: { select: { id: true, name: true } },
           department: { select: { id: true, name: true } },
+          locationRef: { select: { id: true, name: true, code: true, type: true } },
         },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
@@ -126,6 +148,7 @@ export async function POST(request: Request) {
         acquisitionCost: data.acquisition_cost || null,
         condition: data.condition || null,
         location: data.location || null,
+        locationId: data.location_id || null,
         departmentId: data.department_id || null,
         isBookable: data.is_bookable || false,
         status: 'Available',
@@ -136,6 +159,7 @@ export async function POST(request: Request) {
       include: {
         category: { select: { id: true, name: true } },
         department: { select: { id: true, name: true } },
+        locationRef: { select: { id: true, name: true, code: true, type: true } },
       },
     });
 

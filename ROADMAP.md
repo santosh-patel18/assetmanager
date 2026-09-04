@@ -1,15 +1,13 @@
 # AssetFlow — Complete Development Roadmap
 
 > Enterprise Asset & Resource Management Platform  
-> Last updated: August 18, 2026
+> Last updated: August 30, 2026
 
 ---
 
 ## Table of Contents
 
 - [Completed Phases](#-completed-phases)
-- [Phase 4.5 — Quality Hardening](#phase-45--quality-hardening)
-- [Phase 5 — Multi-Location & Custom Fields](#phase-5--multi-location--custom-fields)
 - [Phase 6 — QR Code & Physical Tracking](#phase-6--qr-code--physical-tracking)
 - [Phase 7 — Financial Module](#phase-7--financial-module)
 - [Phase 8 — Vendor & Warranty Management](#phase-8--vendor--warranty-management)
@@ -20,8 +18,13 @@
 - [Phase 13 — Testing & Reliability](#phase-13--testing--reliability)
 - [Phase 14 — Accessibility](#phase-14--accessibility-a11y)
 - [Phase 15 — Advanced Security](#phase-15--advanced-security)
-- [Phase 16 — Monitoring & Analytics](#phase-16--monitoring--analytics)
-- [Phase 17 — Go-to-Market](#phase-17--go-to-market)
+- [Phase 16 — Integrations](#phase-16--integrations)
+- [Phase 17 — Analytics & Intelligence](#phase-17--analytics--intelligence)
+- [Phase 18 — Enterprise Features](#phase-18--enterprise-features)
+- [Phase 19 — UX Quick Wins](#phase-19--ux-quick-wins)
+- [Phase 20 — AI & Automation](#phase-20--ai--automation)
+- [Phase 21 — Monitoring & Observability](#phase-21--monitoring--observability)
+- [Phase 22 — Go-to-Market](#phase-22--go-to-market)
 - [Timeline](#-timeline)
 - [Architecture Evolution](#-architecture-evolution)
 - [Key Decision Points](#-key-decision-points)
@@ -36,76 +39,10 @@
 | **Phase 2** | Full Feature Build | Allocations, Bookings (conflict detection), Maintenance workflow, Audits, Reports, Activity log, Notifications, Org management | 180+ |
 | **Phase 3** | Security Hardening | Input sanitization (XSS/SQLi), rate limiting, API gateway, audit logging, account lockout, password cooldown | 268 |
 | **Phase 4** | UI/UX Beautification | 6 new components (Toast, Tooltip, Skeleton, EmptyState, StatCard, Breadcrumb), sidebar upgrade, animated KPIs, staggered animations, mobile hamburger menu | 268 |
+| **Phase 4.5** | Quality Hardening | Replace alert()/confirm() → ConfirmDialog, N+1 fix, pagination, error boundaries, TypeScript interfaces, button loading states, sidebar persistence, favicon, SEO, focus refresh | 268 |
+| **Phase 5** | Multi-Location & Custom Fields | Location hierarchy (7-level tree), LocationTreeSelect, location-scoped RBAC (`getLocationScope`), location-scoped dashboards/reports/audits/maintenance, asset location transfer, DynamicFieldRenderer, custom field export/search | 268 |
 
-**Current stats**: 268 tests · 46 API routes · 16 pages · 12 UI components · 296-line Prisma schema
-
----
-
-## Phase 4.5 — Quality Hardening
-
-> **Goal**: Fix existing issues before adding new features  
-> **Effort**: ~1 day  
-> **Depends on**: Nothing
-
-### Critical Fixes
-
-| # | Task | Details | Effort |
-|---|------|---------|--------|
-| 1 | Replace `alert()`/`confirm()` | Org page uses browser dialogs instead of Toast + Dialog components | 30 min |
-| 2 | Fix N+1 query | Allocations page makes 100+ API calls — create `/api/allocations` endpoint | 1 hr |
-| 3 | Add pagination | All list APIs return all records — add cursor/offset pagination + UI controls | 2 hr |
-| 4 | Error boundaries | Add `error.tsx`, `not-found.tsx`, `loading.tsx` to prevent white-screen crashes | 45 min |
-
-### Moderate Fixes
-
-| # | Task | Details | Effort |
-|---|------|---------|--------|
-| 5 | TypeScript interfaces | Replace `any[]` in 9 page files with shared types in `src/types/` | 1.5 hr |
-| 6 | Upgrade 8 remaining pages | Add skeleton, empty state, toast, page-enter animation to: allocations, maintenance, org, audits, activity, reports, settings, signup | 2 hr |
-| 7 | Button loading states | Disable + spinner on all action buttons to prevent double-submit | 1 hr |
-| 8 | Confirmation dialogs | Add "Are you sure?" for: Return, Reject, Cancel, Close Audit, Delete | 45 min |
-
-### Minor Fixes
-
-| # | Task | Details | Effort |
-|---|------|---------|--------|
-| 9 | Persist sidebar state | Save collapsed/expanded to `localStorage` | 15 min |
-| 10 | Favicon & app icons | Custom AssetFlow favicon, apple-touch-icon | 15 min |
-| 11 | SEO meta tags | Add `<title>` + `<meta description>` per page via Next.js `metadata` | 30 min |
-| 12 | Auth layout ToastProvider | Wrap auth pages so login/signup can use toasts | 10 min |
-| 13 | Fix Tailwind warnings | Resolve ambiguous `ease-[cubic-bezier]` class warning | 15 min |
-| 14 | Refresh data on tab focus | Re-fetch dashboard data when user returns to tab | 20 min |
-
----
-
-## Phase 5 — Multi-Location & Custom Fields
-
-> **Goal**: Make AssetFlow work for any business — from 3 franchise stores to 300 hotel properties  
-> **Effort**: ~3-4 days  
-> **Depends on**: Phase 4.5
-
-### Multi-Location Hierarchy
-
-| Task | Details |
-|------|---------|
-| `Location` model | Parent-child tree with unlimited depth (HQ → Region → City → Store) |
-| Location CRUD API | Create, edit, delete, move, list with tree structure |
-| Location selector UI | Tree dropdown component for selecting locations |
-| Assign assets to locations | Every asset belongs to a location (not just department) |
-| Location-scoped dashboards | Filter all KPIs, tables, reports by selected location |
-| Location-scoped RBAC | Manager of Store #7 can only see Store #7's data |
-| Location-based transfer | Move assets between locations with approval workflow |
-
-### Custom Fields / Dynamic Forms
-
-| Task | Details |
-|------|---------|
-| Field type support | Text, Number, Date, Dropdown (enum), Boolean, File attachment |
-| Custom field builder UI | Visual form builder in category settings (already has `field_schema` in DB) |
-| Dynamic form rendering | Auto-render custom fields on asset create/edit pages |
-| Custom field validation | Required fields, min/max values, regex patterns |
-| Search & filter by custom fields | Include custom field values in asset search |
-| Custom fields in export | Include in CSV/PDF report exports |
+**Current stats**: 268 tests · 52+ API routes · 17 pages · 20+ UI components · 12 database models · 0 TypeScript errors
 
 ---
 
@@ -113,17 +50,19 @@
 
 > **Goal**: Scan any asset with a phone to see its full history  
 > **Effort**: ~2 days  
-> **Depends on**: Phase 5
+> **Depends on**: Phase 5 ✅
 
 | Task | Details |
 |------|---------|
 | QR code generation | Auto-generate QR code per asset (encode asset ID + URL) |
-| QR display on asset detail | Show QR on asset detail page with download button |
+| QR display on asset detail | Show QR on asset detail page with download button (PNG/SVG) |
 | Bulk label printing | Generate PDF sheet of QR labels (configurable grid: 2x4, 3x8, etc.) |
 | Mobile scan page | Camera-based QR scanner → redirect to asset detail |
 | Barcode support | Optional Code128 barcode for warehouse/handheld scanners |
 | Asset photo upload | Upload/capture photo during registration, display in detail page |
 | Quick check-in/out | Scan QR → one-tap assign/return asset |
+
+**Recommended packages**: `qrcode` (generation), `html5-qrcode` (scanner), `@react-pdf/renderer` (bulk labels)
 
 ---
 
@@ -131,7 +70,7 @@
 
 > **Goal**: Track asset value, depreciation, and purchase cost for accounting  
 > **Effort**: ~2-3 days  
-> **Depends on**: Phase 5
+> **Depends on**: Phase 5 ✅
 
 | Task | Details |
 |------|---------|
@@ -225,7 +164,7 @@
 | Task | Details |
 |------|---------|
 | README.md | Project overview, screenshots, tech stack, setup instructions, architecture diagram |
-| API documentation | All 46+ endpoints documented with request/response examples (Swagger or markdown) |
+| API documentation | All 52+ endpoints documented with request/response examples (Swagger or markdown) |
 | Database schema docs | ER diagram, model descriptions, relationship explanations |
 | Deployment guide | Step-by-step for Vercel, Railway, Docker, VPS deployment |
 | User manual | End-user guide with screenshots for each feature |
@@ -239,7 +178,7 @@
 
 > **Goal**: One-click deploy, automated pipelines, production readiness  
 > **Effort**: ~2 days  
-> **Can run in parallel with Phase 5-10**
+> **Can run in parallel with Phase 6-10**
 
 | Task | Details |
 |------|---------|
@@ -260,7 +199,7 @@
 
 > **Goal**: Confidence that nothing breaks when you ship  
 > **Effort**: ~2-3 days  
-> **Can run in parallel with Phase 5-10**
+> **Can run in parallel with Phase 6-10**
 
 | Task | Details |
 |------|---------|
@@ -319,7 +258,208 @@
 
 ---
 
-## Phase 16 — Monitoring & Analytics
+## Phase 16 — Integrations
+
+> **Goal**: Connect AssetFlow with the tools your company already uses  
+> **Effort**: ~3-4 days  
+> **Depends on**: Phase 10
+
+### HR System Integration
+
+| Task | Details |
+|------|---------|
+| Employee sync API | Import/sync employees from external HR systems |
+| Google Workspace connector | Pull user directory from Google Workspace |
+| BambooHR connector | Sync employees, departments, locations from BambooHR |
+| Zoho People connector | Import employee data from Zoho People |
+| Auto-provisioning | Automatically create/deactivate employees when synced |
+| Sync schedule | Configurable sync frequency: manual, daily, or real-time webhook |
+
+### Accounting Integration
+
+| Task | Details |
+|------|---------|
+| Tally export | Push depreciation entries and purchase data to Tally |
+| Zoho Books connector | Sync asset purchases, depreciation schedules to Zoho Books |
+| QuickBooks integration | Export financial data to QuickBooks Online |
+| Xero integration | Push journal entries for asset depreciation to Xero |
+| Configurable chart of accounts | Map asset categories to GL account codes |
+
+### Communication Integration
+
+| Task | Details |
+|------|---------|
+| Slack Bot | Request assets, get notifications, approve maintenance from Slack |
+| Microsoft Teams Bot | Same capabilities as Slack bot for Teams users |
+| Email digest | Configurable daily/weekly email summary of pending actions |
+| SMS alerts | Optional SMS for critical alerts (asset theft, warranty expiry) via Twilio |
+
+### Webhook System
+
+| Task | Details |
+|------|---------|
+| Webhook management UI | Create, edit, delete webhooks with URL + secret |
+| Event types | asset.created, asset.transferred, maintenance.raised, audit.completed, warranty.expiring |
+| Webhook delivery | Retry with exponential backoff (3 attempts) |
+| Webhook logs | View delivery history, status codes, response times |
+| Webhook testing | "Send test event" button for each webhook |
+
+---
+
+## Phase 17 — Analytics & Intelligence
+
+> **Goal**: Turn raw data into actionable business insights  
+> **Effort**: ~3-4 days  
+> **Depends on**: Phase 10
+
+### Custom Dashboard Builder
+
+| Task | Details |
+|------|---------|
+| Widget library | KPI cards, bar charts, pie charts, line charts, tables, heatmaps |
+| Drag-and-drop layout | Resize and reposition widgets on a grid |
+| Dashboard templates | Pre-built dashboards: Executive, Operations, Finance, Maintenance |
+| Save & share dashboards | Multiple saved dashboards per user, shareable via URL |
+| Dashboard filters | Global date range, location, department filters applied across all widgets |
+| Auto-refresh | Configurable refresh interval (30s, 1m, 5m, manual) |
+
+### Trend Analysis
+
+| Task | Details |
+|------|---------|
+| Month-over-month comparisons | Asset growth rate, maintenance trend, utilization changes |
+| Year-over-year reports | Annual comparison for budgeting and planning |
+| Sparkline charts | Inline trend indicators on KPI cards |
+| Forecasting | Simple linear projection: "At this rate, you'll have 500 assets by March" |
+
+### TCO (Total Cost of Ownership)
+
+| Task | Details |
+|------|---------|
+| TCO calculator | Purchase + maintenance + insurance + depreciation = true cost per asset |
+| TCO by category | Which asset type costs the most to own over its lifetime? |
+| TCO by location | Which location has the highest total ownership cost? |
+| Break-even analysis | "This laptop costs ₹60K but generates ₹8K/month in value — breaks even in 7.5 months" |
+| Replacement recommendations | Flag assets where maintenance cost exceeds replacement cost |
+
+---
+
+## Phase 18 — Enterprise Features
+
+> **Goal**: Make AssetFlow ready for large organizations with complex workflows  
+> **Effort**: ~4-5 days  
+> **Depends on**: Phase 16
+
+### Approval Workflows
+
+| Task | Details |
+|------|---------|
+| Workflow builder | Define multi-level approval chains per action type |
+| Configurable rules | "Asset purchases over ₹50K need CTO approval", "Location transfers need regional manager sign-off" |
+| Approval queue | Dashboard showing all pending approvals with one-click approve/reject |
+| Escalation | Auto-escalate to next level if not approved within X hours |
+| Approval history | Full audit trail of who approved what and when |
+
+### Bulk Operations
+
+| Task | Details |
+|------|---------|
+| Multi-select | Checkbox selection on asset/allocation/maintenance tables |
+| Bulk transfer location | Select 50 assets → move all to a new location in one click |
+| Bulk status change | Change status of multiple assets (e.g., retire 20 old laptops) |
+| Bulk export | Export only selected assets to CSV/PDF |
+| Bulk label print | Print QR labels for selected assets only |
+| Bulk delete | Delete multiple draft/test records with confirmation |
+
+### Asset Leasing Module
+
+| Task | Details |
+|------|---------|
+| Lease tracking | Lease terms, monthly payment, start/end date, buyout option |
+| Lease vs. own analysis | Compare TCO of leasing vs. purchasing |
+| Lease renewal alerts | 60/30/15 day notifications before lease expiry |
+| Lease payment schedule | Track monthly payments with paid/unpaid status |
+| Buyout workflow | Convert leased asset to owned asset at end of term |
+
+### Compliance & Regulatory
+
+| Task | Details |
+|------|---------|
+| ISO 27001 asset register | Pre-formatted report for ISO 27001 Information Asset Register |
+| SOC 2 evidence | Auto-generate evidence of access controls, change logs, audit trails |
+| GDPR data mapping | Identify assets that contain/process personal data |
+| Compliance dashboard | Overview of compliance status across all standards |
+| Custom compliance checks | Define org-specific rules: "All servers must have encryption enabled" |
+
+---
+
+## Phase 19 — UX Quick Wins
+
+> **Goal**: Small features that make the daily experience significantly better  
+> **Effort**: ~2-3 days  
+> **Can run in parallel with Phase 16-18**
+
+| Task | Details | Effort |
+|------|---------|--------|
+| Dark/Light mode toggle | Theme switcher in sidebar — currently dark-only | 2 hr |
+| Keyboard shortcuts | `/` for search, `Ctrl+K` command palette, `N` for new asset | 3 hr |
+| Recently viewed assets | Sidebar widget showing last 10 viewed assets | 1 hr |
+| Asset comparison | Side-by-side compare 2 assets (specs, cost, maintenance history) | 2 hr |
+| Import from CSV | Bulk-upload assets from spreadsheet with column mapping wizard | 4 hr |
+| Favorites / Pinned assets | Star frequently accessed assets for quick access | 1 hr |
+| Global search (Ctrl+K) | Search across assets, employees, locations, maintenance requests from one input | 3 hr |
+| Table column customization | Show/hide and reorder table columns per page | 2 hr |
+| Inline editing | Click-to-edit asset fields directly in the table without opening detail page | 3 hr |
+| User preferences page | Configure notification preferences, default location, date format, timezone | 2 hr |
+
+---
+
+## Phase 20 — AI & Automation
+
+> **Goal**: Let the system learn from data and make intelligent decisions  
+> **Effort**: ~4-5 days  
+> **Depends on**: Phase 17
+
+### Predictive Maintenance
+
+| Task | Details |
+|------|---------|
+| MTBF analysis | Calculate Mean Time Between Failures per asset/category based on historical maintenance data |
+| Failure prediction | Predict when an asset will likely need maintenance next (rule-based + statistical) |
+| Risk scoring | Assign risk scores (low/medium/high/critical) to assets based on age, maintenance history, condition |
+| Proactive alerts | "This printer has a 78% chance of failure in the next 30 days based on 2-year maintenance history" |
+| Maintenance budget forecasting | Predict next quarter's maintenance costs based on trends |
+
+### Smart Allocation
+
+| Task | Details |
+|------|---------|
+| Optimal asset suggestion | When someone requests a laptop, suggest the best one based on: location proximity, condition, utilization history, age |
+| Demand forecasting | "Marketing department will likely need 5 more laptops next quarter based on hiring trends" |
+| Underutilized asset detection | Flag assets that haven't been used in 90+ days — suggest reallocation or retirement |
+| Auto-assignment rules | "All new hires in Engineering get a MacBook Pro + monitor + keyboard automatically" |
+
+### Natural Language Search
+
+| Task | Details |
+|------|---------|
+| NL query parser | "Show me all laptops in Mumbai that were serviced last month" → auto-generate filters |
+| AI-powered search | Semantic search that understands intent, not just keywords |
+| Query suggestions | Auto-complete with smart suggestions based on data patterns |
+| Saved searches | Save frequently used NL queries as one-click shortcuts |
+
+### Anomaly Detection
+
+| Task | Details |
+|------|---------|
+| Unusual patterns | Flag: asset allocated to 5 people in one week, maintenance cost 3x average |
+| Theft/loss detection | Alert when asset hasn't been scanned in expected location for X days |
+| Cost anomalies | Flag purchase orders or maintenance costs that deviate significantly from historical norms |
+| Automated reports | Weekly anomaly digest sent to admins highlighting suspicious patterns |
+
+---
+
+## Phase 21 — Monitoring & Observability
 
 > **Goal**: Know when something breaks before users report it  
 > **Effort**: ~1-2 days  
@@ -339,11 +479,11 @@
 
 ---
 
-## Phase 17 — Go-to-Market
+## Phase 22 — Go-to-Market
 
 > **Goal**: Turn the product into a business  
 > **Effort**: ~3-5 days  
-> **Depends on**: Phases 5-10 mostly complete
+> **Depends on**: Phases 6-20 mostly complete
 
 | Task | Details |
 |------|---------|
@@ -364,22 +504,41 @@
 ## 📊 Timeline
 
 ```
-Phase 4.5  ████░░░░░░░░░░░░░░░░░░░░░░  Quality Hardening     (~1 day)
-Phase 5    ████████████░░░░░░░░░░░░░░░  Multi-Location        (~3-4 days)
-Phase 6    ██████░░░░░░░░░░░░░░░░░░░░░  QR Codes              (~2 days)
-Phase 7    ████████░░░░░░░░░░░░░░░░░░░  Financials            (~2-3 days)
-Phase 8    ██████░░░░░░░░░░░░░░░░░░░░░  Vendor & Warranty     (~2 days)
-Phase 9    ████████░░░░░░░░░░░░░░░░░░░  Preventive Maint.     (~2-3 days)
-Phase 10   ████████████░░░░░░░░░░░░░░░  Mobile & Reports      (~3-4 days)
-Phase 11   ██████░░░░░░░░░░░░░░░░░░░░░  Documentation         (~1-2 days)  ← parallel
-Phase 12   ██████░░░░░░░░░░░░░░░░░░░░░  DevOps                (~2 days)    ← parallel
-Phase 13   ████████░░░░░░░░░░░░░░░░░░░  Testing               (~2-3 days)  ← parallel
-Phase 14   ██████░░░░░░░░░░░░░░░░░░░░░  Accessibility         (~1-2 days)  ← parallel
-Phase 15   ██████░░░░░░░░░░░░░░░░░░░░░  Security              (~2 days)
-Phase 16   ██████░░░░░░░░░░░░░░░░░░░░░  Monitoring            (~1-2 days)
-Phase 17   ██████████████░░░░░░░░░░░░░  Go-to-Market          (~3-5 days)
-           ─────────────────────────────────────────────────────────────────
-           Total estimated effort: ~30-40 days
+                       ┌─ COMPLETED ────────────────────────────────────────┐
+Phase 1-5              ████████████████████████████████████████████████████   ✅ Done
+                       └────────────────────────────────────────────────────┘
+
+                       ┌─ CORE FEATURES ────────────────────────────────────┐
+Phase 6  (QR Codes)    ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ~2 days
+Phase 7  (Financials)  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ~2-3 days
+Phase 8  (Vendors)     ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ~2 days
+Phase 9  (Preventive)  ████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ~2-3 days
+Phase 10 (Mobile+Rpt)  ████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░   ~3-4 days
+                       └────────────────────────────────────────────────────┘
+
+                       ┌─ QUALITY TRACKS (parallel) ────────────────────────┐
+Phase 11 (Docs)        ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ~1-2 days
+Phase 12 (DevOps)      ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ~2 days
+Phase 13 (Testing)     ████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ~2-3 days
+Phase 14 (A11y)        ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ~1-2 days
+Phase 15 (Security)    ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ~2 days
+                       └────────────────────────────────────────────────────┘
+
+                       ┌─ PLATFORM EXPANSION ───────────────────────────────┐
+Phase 16 (Integrations)████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░   ~3-4 days
+Phase 17 (Analytics)   ████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░   ~3-4 days
+Phase 18 (Enterprise)  ██████████████████████████████░░░░░░░░░░░░░░░░░░░░   ~4-5 days
+Phase 19 (UX Wins)     ████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ~2-3 days  ← parallel
+Phase 20 (AI & Auto)   ██████████████████████████████░░░░░░░░░░░░░░░░░░░░   ~4-5 days
+                       └────────────────────────────────────────────────────┘
+
+                       ┌─ LAUNCH ───────────────────────────────────────────┐
+Phase 21 (Monitoring)  ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ~1-2 days
+Phase 22 (Go-to-Market)██████████████████████████████░░░░░░░░░░░░░░░░░░░░   ~3-5 days
+                       └────────────────────────────────────────────────────┘
+
+                       ─────────────────────────────────────────────────────
+                       Total estimated effort: ~50-65 days
 ```
 
 ---
@@ -387,36 +546,44 @@ Phase 17   ██████████████░░░░░░░░░
 ## 🏗 Architecture Evolution
 
 ```
-TODAY (Phase 1-4)                           TARGET (Phase 17)
-─────────────────────                       ─────────────────────────────
-Single office                          →    Multi-tenant, multi-location
-Hardcoded asset fields                 →    Dynamic custom fields per category
+TODAY (Phase 1-5)                           TARGET (Phase 22)
+─────────────────────                       ──────────────────────────────────
+✅ Multi-location hierarchy             →    Multi-tenant, multi-location
+✅ Dynamic custom fields per category   →    Visual form builder UI
+✅ Location-scoped RBAC                 →    Custom approval workflows
+✅ CSV export with custom fields        →    PDF + scheduled + branded reports
 Manual asset lookup                    →    QR scan → instant details
-No financial tracking                  →    Full depreciation + valuation
-No vendor management                   →    Vendor directory + AMC tracking
-Reactive maintenance only              →    Preventive scheduling + calendar
-Desktop only                           →    PWA mobile app + offline mode
+No financial tracking                  →    Full depreciation + valuation + TCO
+No vendor management                   →    Vendor directory + AMC + warranties
+Reactive maintenance only              →    Preventive scheduling + AI prediction
+Desktop responsive                     →    PWA mobile app + offline mode
 No documentation                       →    Full API docs + user manual
 Manual deployment                      →    CI/CD + Docker + auto-deploy
 Unit tests only (268)                  →    Unit + Integration + E2E + Load
-No accessibility                       →    WCAG AA compliant
+No accessibility audit                 →    WCAG AA compliant
 Basic JWT auth                         →    2FA + refresh tokens + CSP
-No monitoring                          →    Sentry + uptime + alerts
-Single user project                    →    SaaS product with billing
+No monitoring                          →    Sentry + uptime + alerting
+No integrations                        →    HR + Accounting + Slack/Teams + Webhooks
+Basic reports only                     →    Custom dashboards + trend analysis + AI
+No bulk operations                     →    Multi-select + bulk actions + CSV import
+No AI/automation                       →    Predictive maintenance + NL search + anomaly detection
+Single deployment                      →    SaaS product with billing + white-label
 English only                           →    Multi-language (i18n)
+Dark mode only                         →    Dark/Light theme toggle
 ```
 
 ---
 
 ## 🔑 Key Decision Points
 
-### Before Phase 5
-- **Location model**: Flat list or tree hierarchy? Just "locations" or "buildings → floors → rooms"?
-- **Tenant isolation**: Shared database with tenant_id column, or separate databases per tenant?
+### Before Phase 6
+- **QR format**: Simple URL or include metadata (asset tag, location) in the QR payload?
+- **Photo storage**: Local filesystem, Cloudinary, AWS S3, or Supabase Storage?
 
 ### Before Phase 7
 - **Currency**: Single currency (₹) or multi-currency with exchange rates?
 - **Depreciation**: Which methods are mandatory? Straight-line only or all three?
+- **Tax compliance**: Indian IT Act depreciation schedules or international standards?
 
 ### Before Phase 10
 - **Mobile strategy**: PWA (faster, cheaper) or React Native (richer, harder)?
@@ -426,7 +593,19 @@ English only                           →    Multi-language (i18n)
 - **2FA enforcement**: Optional for all users, or mandatory for admins?
 - **Session duration**: How long before auto-logout? 24h? 7 days?
 
+### Before Phase 16
+- **Integration priority**: Which systems does your target customer already use?
+- **Webhook format**: REST callbacks or also support GraphQL subscriptions?
+
 ### Before Phase 17
+- **Analytics engine**: Build custom or integrate with Metabase/Grafana?
+- **Real-time dashboards**: WebSocket live updates or periodic polling?
+
+### Before Phase 20
+- **AI approach**: Rule-based heuristics (simpler) or ML models (requires training data)?
+- **NL search**: OpenAI API, self-hosted LLM, or keyword-based NLP?
+
+### Before Phase 22
 - **Hosting**: Self-hosted (customer's server) or SaaS (your server)?
 - **Pricing model**: Per-user, per-asset, per-location, or flat tier?
 - **Target market**: India-first or global from day one?
@@ -435,16 +614,50 @@ English only                           →    Multi-language (i18n)
 
 ## 📎 Quick Reference
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| API Routes | 46 | ~80+ |
-| Pages | 16 | ~25+ |
-| UI Components | 12 | ~20+ |
-| Test Count | 268 | 500+ |
-| Test Types | Unit only | Unit + Integration + E2E |
-| Database Models | 12 | ~18+ |
+| Metric | Current (Phase 5) | Target (Phase 22) |
+|--------|-------------------|-------------------|
+| API Routes | 52+ | ~120+ |
+| Pages | 17 | ~35+ |
+| UI Components | 20+ | ~40+ |
+| Test Count | 268 | 600+ |
+| Test Types | Unit only | Unit + Integration + E2E + Load |
+| Database Models | 12 | ~25+ |
 | Supported Industries | Any (basic) | Any (fully configurable) |
 | Deployment | Manual | CI/CD + Docker |
 | Mobile Support | Responsive | PWA + offline |
 | Languages | English | Multi-language |
 | Auth | JWT | JWT + 2FA + refresh tokens |
+| Integrations | None | HR + Accounting + Slack + Webhooks |
+| AI Features | None | Predictive + NL Search + Anomaly |
+| Dashboards | Fixed | Custom drag-and-drop builder |
+
+---
+
+## 📌 Phase Dependency Graph
+
+```mermaid
+graph TD
+    P5[Phase 5 ✅] --> P6[Phase 6: QR Codes]
+    P5 --> P7[Phase 7: Financials]
+    P7 --> P8[Phase 8: Vendors]
+    P8 --> P9[Phase 9: Preventive Maint.]
+    P9 --> P10[Phase 10: Mobile + Reports]
+    P10 --> P16[Phase 16: Integrations]
+    P10 --> P17[Phase 17: Analytics]
+    P16 --> P18[Phase 18: Enterprise]
+    P17 --> P20[Phase 20: AI & Automation]
+    
+    P5 --> P11[Phase 11: Docs]
+    P5 --> P12[Phase 12: DevOps]
+    P5 --> P13[Phase 13: Testing]
+    P5 --> P14[Phase 14: A11y]
+    P5 --> P15[Phase 15: Security]
+    P5 --> P19[Phase 19: UX Quick Wins]
+    
+    P18 --> P21[Phase 21: Monitoring]
+    P20 --> P21
+    P21 --> P22[Phase 22: Go-to-Market]
+    
+    style P5 fill:#22c55e,color:#fff
+    style P22 fill:#6366f1,color:#fff
+```

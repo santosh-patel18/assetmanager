@@ -1,31 +1,43 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
+import { SkeletonCard } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast-notification';
 import { formatDateTime } from '@/lib/utils';
+import { useFocusRefresh } from '@/lib/use-focus-refresh';
 import { Bell, Check, CheckCheck, Inbox } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { Notification } from '@/types';
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const toast = useToast();
 
-  const fetchNotifications = () => {
+  useEffect(() => {
+    document.title = 'Notifications | AssetFlow';
+  }, []);
+
+  const fetchNotifications = useCallback(() => {
+    setLoading(true);
     fetch('/api/notifications')
       .then(r => r.json())
       .then(d => {
         setNotifications(d.notifications || []);
         setUnreadCount(d.unreadCount || 0);
-      });
-  };
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
 
-  useEffect(() => { fetchNotifications(); }, []);
+  useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
+  useFocusRefresh(fetchNotifications);
 
   const markRead = async (id: string) => {
     await fetch(`/api/notifications/${id}/read`, { method: 'PATCH' });
@@ -74,6 +86,13 @@ export default function NotificationsPage() {
           )}
         </div>
 
+        {loading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonCard key={i} className="h-20" />
+            ))}
+          </div>
+        ) : (
         <div className="space-y-3">
           {notifications.map((notification, i) => (
             <Card
@@ -116,6 +135,7 @@ export default function NotificationsPage() {
             />
           )}
         </div>
+        )}
       </div>
     </div>
   );

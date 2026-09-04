@@ -8,6 +8,7 @@ export const createAssetSchema = z.object({
   acquisition_cost: z.number().nonnegative().optional().nullable(),
   condition: z.string().max(50).optional().nullable(),
   location: z.string().max(255).optional().nullable(),
+  location_id: z.string().uuid().optional().nullable(),
   department_id: z.string().uuid().optional().nullable(),
   is_bookable: z.boolean().optional().default(false),
   attributes: z.record(z.any()).optional().default({}),
@@ -22,6 +23,7 @@ export const updateAssetSchema = z.object({
   acquisition_cost: z.number().nonnegative().optional().nullable(),
   condition: z.string().max(50).optional().nullable(),
   location: z.string().max(255).optional().nullable(),
+  location_id: z.string().uuid().optional().nullable(),
   department_id: z.string().uuid().optional().nullable(),
   is_bookable: z.boolean().optional(),
   attributes: z.record(z.any()).optional(),
@@ -50,7 +52,7 @@ export const transferRequestSchema = z.object({
  */
 export function validateAttributesAgainstSchema(
   attributes: Record<string, unknown>,
-  fieldSchema: Record<string, { type: string; required?: boolean }>
+  fieldSchema: Record<string, { type: string; required?: boolean; options?: string[] }>
 ): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
   
@@ -72,6 +74,18 @@ export function validateAttributesAgainstSchema(
           break;
         case 'boolean':
           if (typeof value !== 'boolean') errors.push(`Attribute '${key}' must be a boolean`);
+          break;
+        case 'date':
+          if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}/.test(value)) {
+            errors.push(`Attribute '${key}' must be a valid date string`);
+          }
+          break;
+        case 'dropdown':
+          if (typeof value !== 'string') {
+            errors.push(`Attribute '${key}' must be a string`);
+          } else if (schema.options && schema.options.length > 0 && !schema.options.includes(value)) {
+            errors.push(`Attribute '${key}' must be one of: ${schema.options.join(', ')}`);
+          }
           break;
       }
     }

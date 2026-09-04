@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Building2, Package, ArrowLeftRight, CalendarDays,
   Wrench, ClipboardCheck, BarChart3, Activity, Bell, LogOut, ChevronLeft,
-  ChevronRight, Menu, X,
+  ChevronRight, Menu, X, MapPin,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ const navSections = [
     items: [
       { label: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
       { label: 'Organization', href: '/org', icon: Building2, roles: ['admin', 'department_head'] },
+      { label: 'Locations', href: '/locations', icon: MapPin, roles: ['admin', 'asset_manager', 'department_head'] },
     ],
   },
   {
@@ -44,8 +45,22 @@ const navSections = [
 export function Sidebar() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('assetflow-sidebar-collapsed') === 'true';
+    }
+    return false;
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Persist sidebar collapsed state
+  const toggleCollapsed = () => {
+    setCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('assetflow-sidebar-collapsed', String(next));
+      return next;
+    });
+  };
 
   // Close mobile menu on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
@@ -63,7 +78,7 @@ export function Sidebar() {
     <aside
       className={cn(
         'fixed left-0 top-0 z-40 h-screen border-r border-border bg-card flex flex-col',
-        'transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+        'transition-all duration-300 ease-smooth',
         // Desktop
         'hidden md:flex',
         collapsed ? 'w-[68px]' : 'w-[260px]'
@@ -152,7 +167,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setCollapsed(!collapsed)}
+            onClick={toggleCollapsed}
             className="h-9 w-9"
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}

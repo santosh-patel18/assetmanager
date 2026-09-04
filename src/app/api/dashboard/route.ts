@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { getCurrentUserFromHeader, verifyRoleFromDB, getDepartmentScope } from '@/lib/auth';
+import { getCurrentUserFromHeader, verifyRoleFromDB, getDepartmentScope, getLocationScope } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
     const user = await getCurrentUserFromHeader(request);
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { searchParams } = new URL(request.url);
+    const locationId = searchParams.get('locationId');
 
     const dbRole = await verifyRoleFromDB(user.userId);
     if (!dbRole) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -20,6 +23,16 @@ export async function GET(request: Request) {
     } else if (dbRole === 'department_head') {
       const deptIds = await getDepartmentScope(user.userId);
       assetFilter = { departmentId: { in: deptIds } };
+      // Auto-apply location scope for department heads with a home location
+      const locIds = await getLocationScope(user.userId);
+      if (locIds.length > 0) {
+        assetFilter.locationId = { in: locIds };
+      }
+    }
+
+    // Apply explicit location filter (overrides auto-scope)
+    if (locationId) {
+      assetFilter.locationId = locationId;
     }
 
     const [

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,10 @@ export default function SettingsPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [policyErrors, setPolicyErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    document.title = 'Settings | AssetFlow';
+  }, []);
 
   const allRulesPassed = POLICY_RULES.every(r => r.test(newPassword)) && newPassword.length > 0;
   const passwordsMatch = newPassword === confirmPassword && confirmPassword.length > 0;

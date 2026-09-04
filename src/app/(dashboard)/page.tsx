@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { Header } from '@/components/layout/header';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,6 +15,8 @@ import {
   AlertTriangle, PlusCircle, BookOpen, ClipboardCheck, Clock,
   Inbox,
 } from 'lucide-react';
+import { LocationTreeSelect, type LocationNode } from '@/components/ui/location-tree-select';
+import { useFocusRefresh } from '@/lib/use-focus-refresh';
 
 interface DashboardData {
   kpi: {
@@ -56,14 +58,30 @@ const quickActions = [
 export default function DashboardPage() {
   const { user } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
+  const [locations, setLocations] = useState<LocationNode[]>([]);
+  const [locationFilter, setLocationFilter] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/dashboard')
+    document.title = 'Dashboard | AssetFlow';
+  }, []);
+
+  const fetchDashboard = useCallback(() => {
+    const params = new URLSearchParams();
+    if (locationFilter) params.set('locationId', locationFilter);
+    fetch(`/api/dashboard?${params}`)
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false); })
       .catch(() => setLoading(false));
-  }, []);
+  }, [locationFilter]);
+
+  useEffect(() => {
+    fetchDashboard();
+    fetch('/api/locations').then(r => r.json()).then(d => setLocations(d.locations || []));
+  }, [fetchDashboard]);
+
+  // Re-fetch when user returns to tab
+  useFocusRefresh(fetchDashboard);
 
   const filteredActions = quickActions.filter(a => a.roles.includes(user?.role || 'employee'));
 
@@ -77,7 +95,18 @@ export default function DashboardPage() {
             <h2 className="text-2xl font-bold">
               Welcome back, <span className="gradient-text">{user?.name}</span>
             </h2>
-            <p className="text-muted-foreground mt-1">Here&apos;s your operational snapshot.</p>
+            <div className="flex items-center gap-4 mt-1">
+              <p className="text-muted-foreground text-sm">Here&apos;s your operational overview.</p>
+              {locations.length > 0 && (
+                <LocationTreeSelect
+                  locations={locations}
+                  value={locationFilter}
+                  onChange={setLocationFilter}
+                  placeholder="All Locations"
+                  className="w-[220px]"
+                />
+              )}
+            </div>
           </div>
         </div>
 

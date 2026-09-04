@@ -250,6 +250,39 @@ async function main() {
       console.log('✓ Sample booking created (Conference Room A)');
     }
   }
+  // --- 8. Create Sample Locations ---
+  let hq = await prisma.location.findFirst({ where: { code: 'HQ' } });
+  if (!hq) {
+    hq = await prisma.location.create({
+      data: { name: 'Headquarters', code: 'HQ', type: 'HQ', address: '100 Main Street, Suite 500' },
+    });
+    console.log('✓ Location: Headquarters');
+
+    const engLab = await prisma.location.create({
+      data: { name: 'Engineering Lab', code: 'ENG-LAB', type: 'Room', parentId: hq.id },
+    });
+    console.log('✓ Location: Engineering Lab (child of HQ)');
+
+    await prisma.location.create({
+      data: { name: 'HR Office', code: 'HR-OFFICE', type: 'Room', parentId: hq.id },
+    });
+    console.log('✓ Location: HR Office (child of HQ)');
+
+    await prisma.location.create({
+      data: { name: 'Finance Floor', code: 'FIN-FLOOR', type: 'Floor', parentId: hq.id },
+    });
+    console.log('✓ Location: Finance Floor (child of HQ)');
+
+    const warehouse = await prisma.location.create({
+      data: { name: 'Central Warehouse', code: 'WAREHOUSE', type: 'Building', address: '200 Industrial Blvd' },
+    });
+    console.log('✓ Location: Central Warehouse');
+
+    await prisma.location.create({
+      data: { name: 'Storage Zone A', code: 'WH-ZONE-A', type: 'Zone', parentId: warehouse.id },
+    });
+    console.log('✓ Location: Storage Zone A (child of Warehouse)');
+  }
 
   console.log('\n✅ Seed complete! Login credentials:');
   console.log('   Admin:          admin@assetflow.com / Admin@123');

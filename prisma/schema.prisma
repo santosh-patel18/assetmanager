@@ -29,6 +29,28 @@ model Department {
   @@map("departments")
 }
 
+model Location {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String     @db.VarChar(255)
+  code        String     @unique @db.VarChar(50)
+  type        String     @db.VarChar(50)
+  parentId    String?    @map("parent_id") @db.Uuid
+  address     String?    @db.Text
+  status      String     @default("Active") @db.VarChar(20)
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz()
+
+  parent      Location?  @relation("LocationHierarchy", fields: [parentId], references: [id])
+  children    Location[] @relation("LocationHierarchy")
+  assets      Asset[]
+  employees   Employee[]  @relation("EmployeeLocation")
+  auditCycles AuditCycle[]
+
+  @@index([parentId], map: "idx_locations_parent")
+  @@index([status], map: "idx_locations_status")
+  @@map("locations")
+}
+
 model Employee {
   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name           String    @db.VarChar(255)
@@ -46,6 +68,8 @@ model Employee {
   deletedAt      DateTime? @map("deleted_at") @db.Timestamptz()
 
   department          Department?          @relation("EmployeeDepartment", fields: [departmentId], references: [id])
+  locationId          String?              @map("location_id") @db.Uuid
+  homeLocation        Location?            @relation("EmployeeLocation", fields: [locationId], references: [id])
   headOfDepartments   Department[]         @relation("DepartmentHead")
   allocations         Allocation[]         @relation("AllocatedBy")
   transferRequests    TransferRequest[]    @relation("RequestedBy")
@@ -89,6 +113,7 @@ model Asset {
   acquisitionCost  Decimal?  @map("acquisition_cost") @db.Decimal(12, 2)
   condition        String?   @db.VarChar(50)
   location         String?   @db.VarChar(255)
+  locationId       String?   @map("location_id") @db.Uuid
   departmentId     String?   @map("department_id") @db.Uuid
   isBookable       Boolean   @default(false) @map("is_bookable")
   status           String    @default("Available") @db.VarChar(20)
@@ -101,6 +126,7 @@ model Asset {
 
   category          AssetCategory        @relation(fields: [categoryId], references: [id])
   department        Department?          @relation(fields: [departmentId], references: [id])
+  locationRef       Location?            @relation(fields: [locationId], references: [id])
   allocations       Allocation[]
   stateLog          AssetStateLog[]
   bookings          ResourceBooking[]
@@ -110,6 +136,7 @@ model Asset {
   @@index([status], map: "idx_assets_status")
   @@index([categoryId], map: "idx_assets_category")
   @@index([departmentId], map: "idx_assets_department")
+  @@index([locationId], map: "idx_assets_location")
   @@index([isBookable], map: "idx_assets_bookable")
   @@map("assets")
 }
@@ -218,6 +245,7 @@ model MaintenanceRequest {
 model AuditCycle {
   id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   scopeDepartmentId String?   @map("scope_department_id") @db.Uuid
+  scopeLocationId   String?   @map("scope_location_id") @db.Uuid
   scopeLocation     String?   @map("scope_location") @db.VarChar(255)
   startDate         DateTime  @map("start_date") @db.Date
   endDate           DateTime  @map("end_date") @db.Date
@@ -226,6 +254,7 @@ model AuditCycle {
   closedAt          DateTime? @map("closed_at") @db.Timestamptz()
 
   scopeDepartment Department?         @relation(fields: [scopeDepartmentId], references: [id])
+  scopeLocationRef Location?          @relation(fields: [scopeLocationId], references: [id])
   creator         Employee            @relation(fields: [createdBy], references: [id])
   auditors        AuditCycleAuditor[]
   items           AuditItem[]
