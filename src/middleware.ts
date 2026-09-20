@@ -15,6 +15,7 @@ const PUBLIC_PATHS = [
   '/login',
   '/signup',
   '/forgot-password',
+  '/scan',
 ];
 
 const AUTH_PATHS = [
@@ -95,7 +96,7 @@ function addSecurityHeaders(response: NextResponse): void {
   // Permissions policy — disable unused browser features
   response.headers.set(
     'Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(), interest-cohort=()'
+    'camera=(self), microphone=(), geolocation=(), interest-cohort=()'
   );
 
   // HSTS — force HTTPS in production (1 year, include subdomains)

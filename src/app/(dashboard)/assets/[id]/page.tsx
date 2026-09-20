@@ -15,7 +15,7 @@ import { LocationTreeSelect, type LocationNode } from '@/components/ui/location-
 import { useToast } from '@/components/ui/toast-notification';
 import { useAuth } from '@/lib/auth-context';
 import { getStatusVariant, formatDate, formatDateTime, formatCurrency } from '@/lib/utils';
-import { Package, History, Wrench, CalendarDays, MapPin, ArrowRightLeft, Loader2 } from 'lucide-react';
+import { Package, History, Wrench, CalendarDays, MapPin, ArrowRightLeft, Loader2, QrCode, Download, Upload, Camera } from 'lucide-react';
 import type { Asset } from '@/types';
 
 export default function AssetDetailPage() {
@@ -29,6 +29,7 @@ export default function AssetDetailPage() {
   const [transferLocationId, setTransferLocationId] = useState<string | null>(null);
   const [transferReason, setTransferReason] = useState('');
   const [transferring, setTransferring] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const isManager = user?.role === 'admin' || user?.role === 'asset_manager';
 
@@ -71,6 +72,40 @@ export default function AssetDetailPage() {
   const hasCustomFields = Object.keys(fieldSchema).length > 0;
   const locationDisplay = asset.locationRef?.name || asset.location || '—';
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+      const res = await fetch(`/api/assets/${params.id}/photo`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success('Photo Uploaded', 'Asset photo has been updated.');
+        setAsset({ ...asset, photoUrl: data.photoUrl });
+      } else {
+        toast.error('Upload Failed', data.error || 'Failed to upload photo');
+      }
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const downloadQR = async (format: 'png' | 'svg') => {
+    const res = await fetch(`/api/assets/${asset.id}/qr?format=${format}&size=400`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${asset.assetTag}-qr.${format}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen">
       <Header title={`${asset.assetTag} — ${asset.name}`} />
@@ -81,13 +116,25 @@ export default function AssetDetailPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white"><Package className="h-6 w-6" /></div>
+                  {asset.photoUrl ? (
+                    <img src={asset.photoUrl} alt={asset.name} className="h-12 w-12 rounded-lg object-cover border" />
+                  ) : (
+                    <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white"><Package className="h-6 w-6" /></div>
+                  )}
                   <div>
                     <CardTitle>{asset.name}</CardTitle>
                     <p className="text-sm text-muted-foreground font-mono">{asset.assetTag}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {isManager && (
+                    <label className="cursor-pointer">
+                      <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoUpload} className="hidden" />
+                      <Button variant="ghost" size="sm" className="gap-1 text-xs" asChild disabled={uploadingPhoto}>
+                        <span>{uploadingPhoto ? <Loader2 className="h-3 w-3 animate-spin" /> : <Camera className="h-3 w-3" />} Photo</span>
+                      </Button>
+                    </label>
+                  )}
                   <Badge variant={getStatusVariant(asset.status)} className="text-sm px-3 py-1">{asset.status}</Badge>
                 </div>
               </div>
@@ -123,20 +170,51 @@ export default function AssetDetailPage() {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader><CardTitle className="text-base">{hasCustomFields ? `${asset.category?.name} Fields` : 'Attributes'}</CardTitle></CardHeader>
-            <CardContent>
-              {hasCustomFields ? (
-                <DynamicFieldDisplay fieldSchema={fieldSchema} values={attributes} />
-              ) : Object.keys(attributes).length > 0 ? (
-                <div className="space-y-2 text-sm">
-                  {Object.entries(attributes).map(([k, v]) => (
-                    <div key={k} className="flex justify-between"><span className="text-muted-foreground">{k}</span><span className="font-medium">{String(v)}</span></div>
-                  ))}
+
+          {/* Right Column: QR Code + Custom Fields */}
+          <div className="space-y-6">
+            {/* QR Code Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <QrCode className="h-4 w-4" /> QR Code
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/api/assets/${asset.id}/qr?format=png&size=200`}
+                  alt={`QR Code for ${asset.assetTag}`}
+                  className="h-40 w-40 rounded-lg bg-white p-2"
+                />
+                <p className="text-xs text-muted-foreground text-center">Scan to view asset details</p>
+                <div className="flex gap-2 w-full">
+                  <Button variant="outline" size="sm" onClick={() => downloadQR('png')} className="flex-1 gap-1 text-xs">
+                    <Download className="h-3 w-3" /> PNG
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => downloadQR('svg')} className="flex-1 gap-1 text-xs">
+                    <Download className="h-3 w-3" /> SVG
+                  </Button>
                 </div>
-              ) : <p className="text-sm text-muted-foreground">No attributes</p>}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Custom Fields Card */}
+            <Card>
+              <CardHeader><CardTitle className="text-base">{hasCustomFields ? `${asset.category?.name} Fields` : 'Attributes'}</CardTitle></CardHeader>
+              <CardContent>
+                {hasCustomFields ? (
+                  <DynamicFieldDisplay fieldSchema={fieldSchema} values={attributes} />
+                ) : Object.keys(attributes).length > 0 ? (
+                  <div className="space-y-2 text-sm">
+                    {Object.entries(attributes).map(([k, v]) => (
+                      <div key={k} className="flex justify-between"><span className="text-muted-foreground">{k}</span><span className="font-medium">{String(v)}</span></div>
+                    ))}
+                  </div>
+                ) : <p className="text-sm text-muted-foreground">No attributes</p>}
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* History Tabs */}

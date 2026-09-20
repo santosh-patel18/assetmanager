@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Building2, Package, ArrowLeftRight, CalendarDays,
   Wrench, ClipboardCheck, BarChart3, Activity, Bell, LogOut, ChevronLeft,
-  ChevronRight, Menu, X, MapPin,
+  ChevronRight, Menu, X, MapPin, ScanLine,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ const navSections = [
       { label: 'Allocations', href: '/allocations', icon: ArrowLeftRight, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
       { label: 'Bookings', href: '/bookings', icon: CalendarDays, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
       { label: 'Maintenance', href: '/maintenance', icon: Wrench, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
+      { label: 'QR Scanner', href: '/scanner', icon: ScanLine, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
     ],
   },
   {
