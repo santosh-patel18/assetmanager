@@ -15,6 +15,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { PaginationControls } from '@/components/ui/pagination-controls';
 import { useToast } from '@/components/ui/toast-notification';
 import { getStatusVariant, formatDateTime } from '@/lib/utils';
+import { useFocusRefresh } from '@/lib/use-focus-refresh';
 import { CalendarDays, Plus, X, Loader2 } from 'lucide-react';
 import type { ResourceBooking, Asset } from '@/types';
 
@@ -50,6 +51,7 @@ export default function BookingsPage() {
     fetchBookings();
     fetch('/api/assets?bookable=true&limit=100').then(r => r.json()).then(d => setResources(d.assets || []));
   }, [fetchBookings]);
+  useFocusRefresh(fetchBookings);
 
   const handleBook = async () => {
     setError('');
