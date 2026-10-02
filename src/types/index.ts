@@ -73,6 +73,14 @@ export interface Asset {
   attributes: Record<string, unknown>;
   photoUrl: string | null;
   documentUrls: string[];
+  // Financial fields (Phase 7)
+  purchaseOrderNumber: string | null;
+  invoiceNumber: string | null;
+  supplier: string | null;
+  depreciationMethod: string | null;
+  usefulLifeMonths: number | null;
+  salvageValue: string | null;
+  warrantyEndDate: string | null;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -83,6 +91,8 @@ export interface Asset {
   maintenanceRequests?: MaintenanceRequest[];
   stateLog?: { id: string; fromStatus: string | null; toStatus: string; changedBy: string; changedAt: string; createdAt: string; changer?: Employee }[];
   bookings?: ResourceBooking[];
+  insurancePolicies?: InsurancePolicy[];
+  depreciationRecords?: DepreciationRecord[];
 }
 
 // ─── Allocation & Transfer ──────────────────────────────────────
@@ -229,4 +239,59 @@ export interface PaginationMeta {
 export interface PaginatedResponse<T> {
   data: T[];
   pagination: PaginationMeta;
+}
+
+// ─── Financial (Phase 7) ───────────────────────────────────────
+
+export interface InsurancePolicy {
+  id: string;
+  assetId: string;
+  policyNumber: string;
+  provider: string;
+  coverageAmount: string;
+  premium: string | null;
+  startDate: string;
+  endDate: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  asset?: Asset;
+}
+
+export interface DepreciationRecord {
+  id: string;
+  assetId: string;
+  year: number;
+  month: number;
+  openingValue: string;
+  depreciationAmt: string;
+  closingValue: string;
+  method: string;
+  createdAt: string;
+  asset?: Asset;
+}
+
+export interface DepreciationEntry {
+  year: number;
+  month: number;
+  openingValue: number;
+  depreciationAmt: number;
+  closingValue: number;
+}
+
+export interface AssetBookValue {
+  bookValue: number;
+  totalDepreciation: number;
+  percentDepreciated: number;
+  monthsElapsed: number;
+}
+
+export interface FinancialSummary {
+  totalAcquisitionCost: number;
+  totalCurrentBookValue: number;
+  totalInsuranceCoverage: number;
+  expiringPoliciesCount: number;
+  byCategory: { name: string; value: number }[];
+  byDepartment: { name: string; value: number }[];
+  byLocation: { name: string; value: number }[];
 }

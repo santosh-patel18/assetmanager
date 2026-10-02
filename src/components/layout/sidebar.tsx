@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Building2, Package, ArrowLeftRight, CalendarDays,
   Wrench, ClipboardCheck, BarChart3, Activity, Bell, LogOut, ChevronLeft,
-  ChevronRight, Menu, X, MapPin, ScanLine,
+  ChevronRight, Menu, X, MapPin, ScanLine, IndianRupee,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ const navSections = [
   {
     label: 'Main',
     items: [
-      { label: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
+      { label: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['admin', 'finance_manager', 'asset_manager', 'department_head', 'employee'] },
       { label: 'Organization', href: '/org', icon: Building2, roles: ['admin', 'department_head'] },
       { label: 'Locations', href: '/locations', icon: MapPin, roles: ['admin', 'asset_manager', 'department_head'] },
     ],
@@ -25,10 +25,11 @@ const navSections = [
   {
     label: 'Management',
     items: [
-      { label: 'Assets', href: '/assets', icon: Package, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
-      { label: 'Allocations', href: '/allocations', icon: ArrowLeftRight, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
-      { label: 'Bookings', href: '/bookings', icon: CalendarDays, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
-      { label: 'Maintenance', href: '/maintenance', icon: Wrench, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
+      { label: 'Assets', href: '/assets', icon: Package, roles: ['admin', 'finance_manager', 'asset_manager', 'department_head', 'employee'] },
+      { label: 'Allocations', href: '/allocations', icon: ArrowLeftRight, roles: ['admin', 'finance_manager', 'asset_manager', 'department_head', 'employee'] },
+      { label: 'Bookings', href: '/bookings', icon: CalendarDays, roles: ['admin', 'finance_manager', 'asset_manager', 'department_head', 'employee'] },
+      { label: 'Maintenance', href: '/maintenance', icon: Wrench, roles: ['admin', 'finance_manager', 'asset_manager', 'department_head', 'employee'] },
+      { label: 'Financials', href: '/financials', icon: IndianRupee, roles: ['admin', 'finance_manager', 'asset_manager', 'department_head'] },
       { label: 'QR Scanner', href: '/scanner', icon: ScanLine, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
     ],
   },
@@ -36,9 +37,9 @@ const navSections = [
     label: 'System',
     items: [
       { label: 'Audits', href: '/audits', icon: ClipboardCheck, roles: ['admin', 'asset_manager'] },
-      { label: 'Reports', href: '/reports', icon: BarChart3, roles: ['admin', 'asset_manager'] },
-      { label: 'Activity', href: '/activity', icon: Activity, roles: ['admin', 'asset_manager', 'department_head'] },
-      { label: 'Notifications', href: '/notifications', icon: Bell, roles: ['admin', 'asset_manager', 'department_head', 'employee'] },
+      { label: 'Reports', href: '/reports', icon: BarChart3, roles: ['admin', 'finance_manager', 'asset_manager'] },
+      { label: 'Activity', href: '/activity', icon: Activity, roles: ['admin', 'finance_manager', 'asset_manager', 'department_head'] },
+      { label: 'Notifications', href: '/notifications', icon: Bell, roles: ['admin', 'finance_manager', 'asset_manager', 'department_head', 'employee'] },
     ],
   },
 ];

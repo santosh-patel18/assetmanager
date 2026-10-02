@@ -8,12 +8,29 @@ export const EmployeeRole = {
   EMPLOYEE: 'employee',
   DEPARTMENT_HEAD: 'department_head',
   ASSET_MANAGER: 'asset_manager',
+  FINANCE_MANAGER: 'finance_manager',
   ADMIN: 'admin',
 } as const;
 export type EmployeeRole = (typeof EmployeeRole)[keyof typeof EmployeeRole];
 
 export const ELEVATED_ROLES: readonly EmployeeRole[] = [
   EmployeeRole.ADMIN,
+  EmployeeRole.FINANCE_MANAGER,
+  EmployeeRole.ASSET_MANAGER,
+  EmployeeRole.DEPARTMENT_HEAD,
+] as const;
+
+/** Roles with financial management authority */
+export const FINANCIAL_ROLES: readonly EmployeeRole[] = [
+  EmployeeRole.ADMIN,
+  EmployeeRole.FINANCE_MANAGER,
+  EmployeeRole.ASSET_MANAGER,
+] as const;
+
+/** Roles allowed to view financial dashboards and reports */
+export const FINANCIAL_VIEW_ROLES: readonly EmployeeRole[] = [
+  EmployeeRole.ADMIN,
+  EmployeeRole.FINANCE_MANAGER,
   EmployeeRole.ASSET_MANAGER,
   EmployeeRole.DEPARTMENT_HEAD,
 ] as const;
@@ -160,6 +177,8 @@ export const NotificationType = {
   OVERDUE_RETURN: 'overdue_return',
   AUDIT_DISCREPANCY: 'audit_discrepancy',
   ROLE_CHANGED: 'role_changed',
+  INSURANCE_EXPIRING: 'insurance_expiring',
+  INSURANCE_EXPIRED: 'insurance_expired',
 } as const;
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];
 
@@ -197,6 +216,12 @@ export const ActivityAction = {
   CATEGORY_CREATED: 'category_created',
   ROLE_CHANGED: 'role_changed',
   EMPLOYEE_STATUS_CHANGED: 'employee_status_changed',
+  // Financial
+  ASSET_FINANCIALS_UPDATED: 'asset_financials_updated',
+  DEPRECIATION_CALCULATED: 'depreciation_calculated',
+  INSURANCE_CREATED: 'insurance_created',
+  INSURANCE_UPDATED: 'insurance_updated',
+  INSURANCE_CANCELLED: 'insurance_cancelled',
 } as const;
 export type ActivityAction = (typeof ActivityAction)[keyof typeof ActivityAction];
 
@@ -206,3 +231,19 @@ export const CategoryStatus = {
   INACTIVE: 'Inactive',
 } as const;
 export type CategoryStatus = (typeof CategoryStatus)[keyof typeof CategoryStatus];
+
+// ─── Depreciation Methods ────────────────────────────────────────
+export const DepreciationMethod = {
+  STRAIGHT_LINE: 'straight_line',
+  DECLINING_BALANCE: 'declining_balance',
+  SUM_OF_YEARS: 'sum_of_years',
+} as const;
+export type DepreciationMethod = (typeof DepreciationMethod)[keyof typeof DepreciationMethod];
+
+// ─── Insurance Policy Status ─────────────────────────────────────
+export const InsurancePolicyStatus = {
+  ACTIVE: 'Active',
+  EXPIRED: 'Expired',
+  CANCELLED: 'Cancelled',
+} as const;
+export type InsurancePolicyStatus = (typeof InsurancePolicyStatus)[keyof typeof InsurancePolicyStatus];

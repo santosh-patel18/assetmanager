@@ -130,6 +130,22 @@ async function main() {
   });
   console.log('✓ Employees created');
 
+  // --- Finance Manager user (Phase 7) ---
+  const financePassword = await bcrypt.hash('Finance@123', 12);
+  const financeManager = await prisma.employee.upsert({
+    where: { email: 'finance@smartledger.com' },
+    update: {},
+    create: {
+      name: 'Eve Finance',
+      email: 'finance@smartledger.com',
+      passwordHash: financePassword,
+      role: 'finance_manager',
+      departmentId: finance.id,
+      status: 'Active',
+    },
+  });
+  console.log('✓ Finance Manager created:', financeManager.email);
+
   // --- 4. Create Categories ---
   let laptopCat = await prisma.assetCategory.findFirst({ where: { name: 'Laptops' } });
   if (!laptopCat) {
@@ -169,16 +185,16 @@ async function main() {
 
   // --- 5. Create Assets ---
   const assetsData = [
-    { assetTag: 'AF-0001', name: 'MacBook Pro 16" M3', categoryId: laptopCat.id, serialNumber: 'SN-MBP-001', status: 'Available', location: 'Floor 2, Rack A', departmentId: engineering.id, isBookable: false, condition: 'New', acquisitionCost: 2499.99, acquisitionDate: new Date('2024-06-15'), attributes: { brand: 'Apple', ram_gb: 32, warranty_months: 24 } },
-    { assetTag: 'AF-0002', name: 'ThinkPad X1 Carbon', categoryId: laptopCat.id, serialNumber: 'SN-TPX-001', status: 'Available', location: 'Floor 2, Rack A', departmentId: engineering.id, isBookable: false, condition: 'New', acquisitionCost: 1899.99, acquisitionDate: new Date('2024-07-01'), attributes: { brand: 'Lenovo', ram_gb: 16, warranty_months: 36 } },
-    { assetTag: 'AF-0003', name: 'Dell Latitude 5540', categoryId: laptopCat.id, serialNumber: 'SN-DL5-001', status: 'Available', location: 'Floor 1, Rack B', departmentId: hr.id, isBookable: false, condition: 'Good', acquisitionCost: 1299.99, acquisitionDate: new Date('2024-03-10'), attributes: { brand: 'Dell', ram_gb: 16, warranty_months: 12 } },
+    { assetTag: 'AF-0001', name: 'MacBook Pro 16" M3', categoryId: laptopCat.id, serialNumber: 'SN-MBP-001', status: 'Available', location: 'Floor 2, Rack A', departmentId: engineering.id, isBookable: false, condition: 'New', acquisitionCost: 2499.99, acquisitionDate: new Date('2024-06-15'), attributes: { brand: 'Apple', ram_gb: 32, warranty_months: 24 }, purchaseOrderNumber: 'PO-2024-001', invoiceNumber: 'INV-MBP-001', supplier: 'Apple India Pvt Ltd', depreciationMethod: 'straight_line', usefulLifeMonths: 60, salvageValue: 500, warrantyEndDate: new Date('2026-06-15') },
+    { assetTag: 'AF-0002', name: 'ThinkPad X1 Carbon', categoryId: laptopCat.id, serialNumber: 'SN-TPX-001', status: 'Available', location: 'Floor 2, Rack A', departmentId: engineering.id, isBookable: false, condition: 'New', acquisitionCost: 1899.99, acquisitionDate: new Date('2024-07-01'), attributes: { brand: 'Lenovo', ram_gb: 16, warranty_months: 36 }, purchaseOrderNumber: 'PO-2024-002', invoiceNumber: 'INV-TPX-001', supplier: 'Lenovo India', depreciationMethod: 'declining_balance', usefulLifeMonths: 48, salvageValue: 300, warrantyEndDate: new Date('2027-07-01') },
+    { assetTag: 'AF-0003', name: 'Dell Latitude 5540', categoryId: laptopCat.id, serialNumber: 'SN-DL5-001', status: 'Available', location: 'Floor 1, Rack B', departmentId: hr.id, isBookable: false, condition: 'Good', acquisitionCost: 1299.99, acquisitionDate: new Date('2024-03-10'), attributes: { brand: 'Dell', ram_gb: 16, warranty_months: 12 }, purchaseOrderNumber: 'PO-2024-003', invoiceNumber: 'INV-DL5-001', supplier: 'Dell Technologies', depreciationMethod: 'straight_line', usefulLifeMonths: 48, salvageValue: 200 },
     { assetTag: 'AF-0004', name: 'Standing Desk Pro', categoryId: furnitureCat.id, serialNumber: 'SN-SD-001', status: 'Available', location: 'Floor 2', departmentId: engineering.id, isBookable: false, condition: 'New', acquisitionCost: 899.00, acquisitionDate: new Date('2024-08-01'), attributes: { material: 'Bamboo', color: 'Natural' } },
-    { assetTag: 'AF-0005', name: 'Ergonomic Chair', categoryId: furnitureCat.id, serialNumber: 'SN-EC-001', status: 'Available', location: 'Floor 2', departmentId: engineering.id, isBookable: false, condition: 'New', acquisitionCost: 1495.00, acquisitionDate: new Date('2024-08-01'), attributes: { material: 'Mesh', color: 'Black' } },
+    { assetTag: 'AF-0005', name: 'Ergonomic Chair', categoryId: furnitureCat.id, serialNumber: 'SN-EC-001', status: 'Available', location: 'Floor 2', departmentId: engineering.id, isBookable: false, condition: 'New', acquisitionCost: 1495.00, acquisitionDate: new Date('2024-08-01'), attributes: { material: 'Mesh', color: 'Black' }, depreciationMethod: 'sum_of_years', usefulLifeMonths: 120, salvageValue: 100 },
     { assetTag: 'AF-0006', name: 'Conference Room A', categoryId: meetingRoomCat.id, status: 'Available', location: 'Building 1, Floor 3', isBookable: true, condition: 'Good', attributes: { capacity: 20, has_projector: true } },
     { assetTag: 'AF-0007', name: 'Huddle Room B', categoryId: meetingRoomCat.id, status: 'Available', location: 'Building 1, Floor 2', isBookable: true, condition: 'Good', attributes: { capacity: 6, has_projector: false } },
-    { assetTag: 'AF-0008', name: 'Toyota Corolla Fleet', categoryId: vehicleCat.id, serialNumber: 'VIN-TC-001', status: 'Available', location: 'Parking Lot A', departmentId: operations.id, isBookable: true, condition: 'Good', acquisitionCost: 25000, acquisitionDate: new Date('2023-01-15'), attributes: { make: 'Toyota', model: 'Corolla', year: 2023 } },
-    { assetTag: 'AF-0009', name: 'Cisco Switch 24-Port', categoryId: networkCat.id, serialNumber: 'SN-CS24-001', status: 'Available', location: 'Server Room', departmentId: engineering.id, isBookable: false, condition: 'Good', acquisitionCost: 4500, acquisitionDate: new Date('2024-02-01'), attributes: { ports: 24, speed_gbps: 10 } },
-    { assetTag: 'AF-0010', name: 'HP ProLiant Server', categoryId: networkCat.id, serialNumber: 'SN-HP-001', status: 'Available', location: 'Server Room', departmentId: engineering.id, isBookable: false, condition: 'New', acquisitionCost: 12000, acquisitionDate: new Date('2024-09-01'), attributes: { ports: 4, speed_gbps: 25 } },
+    { assetTag: 'AF-0008', name: 'Toyota Corolla Fleet', categoryId: vehicleCat.id, serialNumber: 'VIN-TC-001', status: 'Available', location: 'Parking Lot A', departmentId: operations.id, isBookable: true, condition: 'Good', acquisitionCost: 25000, acquisitionDate: new Date('2023-01-15'), attributes: { make: 'Toyota', model: 'Corolla', year: 2023 }, purchaseOrderNumber: 'PO-2023-010', supplier: 'Toyota Motor India', depreciationMethod: 'declining_balance', usefulLifeMonths: 96, salvageValue: 5000 },
+    { assetTag: 'AF-0009', name: 'Cisco Switch 24-Port', categoryId: networkCat.id, serialNumber: 'SN-CS24-001', status: 'Available', location: 'Server Room', departmentId: engineering.id, isBookable: false, condition: 'Good', acquisitionCost: 4500, acquisitionDate: new Date('2024-02-01'), attributes: { ports: 24, speed_gbps: 10 }, supplier: 'Cisco Systems', depreciationMethod: 'straight_line', usefulLifeMonths: 60, salvageValue: 500 },
+    { assetTag: 'AF-0010', name: 'HP ProLiant Server', categoryId: networkCat.id, serialNumber: 'SN-HP-001', status: 'Available', location: 'Server Room', departmentId: engineering.id, isBookable: false, condition: 'New', acquisitionCost: 12000, acquisitionDate: new Date('2024-09-01'), attributes: { ports: 4, speed_gbps: 25 }, purchaseOrderNumber: 'PO-2024-015', invoiceNumber: 'INV-HP-001', supplier: 'HP Enterprise India', depreciationMethod: 'straight_line', usefulLifeMonths: 60, salvageValue: 1500 },
   ];
 
   for (const assetData of assetsData) {
@@ -284,12 +300,34 @@ async function main() {
     console.log('✓ Location: Storage Zone A (child of Warehouse)');
   }
 
+  // --- 10. Sample Insurance Policies (Phase 7) ---
+  const mbpAsset = await prisma.asset.findUnique({ where: { assetTag: 'AF-0001' } });
+  const serverAsset = await prisma.asset.findUnique({ where: { assetTag: 'AF-0010' } });
+  const vehicleAsset = await prisma.asset.findUnique({ where: { assetTag: 'AF-0008' } });
+  const ciscoAsset = await prisma.asset.findUnique({ where: { assetTag: 'AF-0009' } });
+
+  const insuranceData = [
+    { policyNumber: 'POL-2024-001', provider: 'HDFC ERGO', coverageAmount: 3000, premium: 120, startDate: new Date('2024-06-15'), endDate: new Date('2025-06-14'), status: 'Expired', assetId: mbpAsset!.id },
+    { policyNumber: 'POL-2025-001', provider: 'ICICI Lombard', coverageAmount: 3500, premium: 150, startDate: new Date('2025-06-15'), endDate: new Date('2026-12-15'), status: 'Active', assetId: mbpAsset!.id },
+    { policyNumber: 'POL-2024-010', provider: 'Bajaj Allianz', coverageAmount: 15000, premium: 800, startDate: new Date('2024-09-01'), endDate: new Date('2026-10-15'), status: 'Active', assetId: serverAsset!.id },
+    { policyNumber: 'POL-2023-005', provider: 'New India Assurance', coverageAmount: 30000, premium: 1200, startDate: new Date('2023-01-15'), endDate: new Date('2027-01-14'), status: 'Active', assetId: vehicleAsset!.id },
+  ];
+
+  for (const ins of insuranceData) {
+    const existing = await prisma.insurancePolicy.findFirst({ where: { policyNumber: ins.policyNumber } });
+    if (!existing) {
+      await prisma.insurancePolicy.create({ data: ins });
+    }
+  }
+  console.log('✓ Sample insurance policies created');
+
   console.log('\n✅ Seed complete! Login credentials:');
-  console.log('   Admin:          admin@smartledger.com / Admin@123');
-  console.log('   Asset Manager:  manager@smartledger.com / Manager@123');
-  console.log('   Dept Head:      head@smartledger.com / Head@123');
-  console.log('   Employee:       charlie@smartledger.com / Employee@123');
-  console.log('   Employee:       diana@smartledger.com / Employee@123');
+  console.log('   Admin:           admin@smartledger.com / Admin@123');
+  console.log('   Finance Manager: finance@smartledger.com / Finance@123');
+  console.log('   Asset Manager:   manager@smartledger.com / Manager@123');
+  console.log('   Dept Head:       head@smartledger.com / Head@123');
+  console.log('   Employee:        charlie@smartledger.com / Employee@123');
+  console.log('   Employee:        diana@smartledger.com / Employee@123');
 }
 
 main()

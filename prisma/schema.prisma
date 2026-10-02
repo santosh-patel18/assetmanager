@@ -120,18 +120,28 @@ model Asset {
   attributes       Json      @default("{}") @db.JsonB
   photoUrl         String?   @map("photo_url") @db.Text
   documentUrls     String[]  @map("document_urls")
+  // Financial fields (Phase 7)
+  purchaseOrderNumber String?   @map("purchase_order_number") @db.VarChar(100)
+  invoiceNumber       String?   @map("invoice_number") @db.VarChar(100)
+  supplier            String?   @db.VarChar(255)
+  depreciationMethod  String?   @map("depreciation_method") @db.VarChar(30)
+  usefulLifeMonths    Int?      @map("useful_life_months")
+  salvageValue        Decimal?  @map("salvage_value") @db.Decimal(12, 2)
+  warrantyEndDate     DateTime? @map("warranty_end_date") @db.Date
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
   deletedAt        DateTime? @map("deleted_at") @db.Timestamptz()
 
-  category          AssetCategory        @relation(fields: [categoryId], references: [id])
-  department        Department?          @relation(fields: [departmentId], references: [id])
-  locationRef       Location?            @relation(fields: [locationId], references: [id])
-  allocations       Allocation[]
-  stateLog          AssetStateLog[]
-  bookings          ResourceBooking[]
+  category            AssetCategory        @relation(fields: [categoryId], references: [id])
+  department          Department?          @relation(fields: [departmentId], references: [id])
+  locationRef         Location?            @relation(fields: [locationId], references: [id])
+  allocations         Allocation[]
+  stateLog            AssetStateLog[]
+  bookings            ResourceBooking[]
   maintenanceRequests MaintenanceRequest[]
-  auditItems        AuditItem[]
+  auditItems          AuditItem[]
+  insurancePolicies   InsurancePolicy[]
+  depreciationRecords DepreciationRecord[]
 
   @@index([status], map: "idx_assets_status")
   @@index([categoryId], map: "idx_assets_category")
@@ -321,4 +331,43 @@ model Notification {
   @@index([recipientId, read], map: "idx_notifications_recipient_read")
   @@index([createdAt], map: "idx_notifications_created_at")
   @@map("notifications")
+}
+
+model InsurancePolicy {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assetId         String    @map("asset_id") @db.Uuid
+  policyNumber    String    @map("policy_number") @db.VarChar(100)
+  provider        String    @db.VarChar(255)
+  coverageAmount  Decimal   @map("coverage_amount") @db.Decimal(12, 2)
+  premium         Decimal?  @db.Decimal(12, 2)
+  startDate       DateTime  @map("start_date") @db.Date
+  endDate         DateTime  @map("end_date") @db.Date
+  status          String    @default("Active") @db.VarChar(20)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz()
+
+  asset           Asset     @relation(fields: [assetId], references: [id])
+
+  @@index([assetId], map: "idx_insurance_asset")
+  @@index([endDate], map: "idx_insurance_end_date")
+  @@index([status], map: "idx_insurance_status")
+  @@map("insurance_policies")
+}
+
+model DepreciationRecord {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assetId          String   @map("asset_id") @db.Uuid
+  year             Int
+  month            Int
+  openingValue     Decimal  @map("opening_value") @db.Decimal(12, 2)
+  depreciationAmt  Decimal  @map("depreciation_amt") @db.Decimal(12, 2)
+  closingValue     Decimal  @map("closing_value") @db.Decimal(12, 2)
+  method           String   @db.VarChar(30)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  asset            Asset    @relation(fields: [assetId], references: [id])
+
+  @@unique([assetId, year, month])
+  @@index([assetId], map: "idx_depreciation_asset")
+  @@map("depreciation_records")
 }
