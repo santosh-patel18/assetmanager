@@ -1,5 +1,5 @@
 /**
- * Centralized error hierarchy for AssetFlow.
+ * Centralized error hierarchy for Smart Ledger.
  * All API routes should throw these instead of returning manual error responses.
  */
 

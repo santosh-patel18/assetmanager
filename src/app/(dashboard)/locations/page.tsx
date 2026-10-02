@@ -149,7 +149,7 @@ export default function LocationsPage() {
     name: '', code: '', type: '' as string, parent_id: null as string | null, address: '',
   });
 
-  useEffect(() => { document.title = 'Locations | AssetFlow'; }, []);
+  useEffect(() => { document.title = 'Locations | Smart Ledger'; }, []);
 
   const fetchLocations = useCallback(() => {
     setLoading(true);

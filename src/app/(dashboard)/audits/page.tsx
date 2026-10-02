@@ -36,7 +36,7 @@ export default function AuditsPage() {
   const [form, setForm] = useState({ scope_department_id: '', scope_location: '', start_date: '', end_date: '', auditor_ids: [] as string[] });
 
   useEffect(() => {
-    document.title = 'Audits | AssetFlow';
+    document.title = 'Audits | Smart Ledger';
   }, []);
 
   const fetchData = useCallback(() => {

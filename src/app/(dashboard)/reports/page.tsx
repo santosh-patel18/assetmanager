@@ -74,7 +74,7 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = 'Reports | AssetFlow';
+    document.title = 'Reports | Smart Ledger';
   }, []);
 
   const fetchReports = useCallback(() => {

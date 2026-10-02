@@ -31,7 +31,7 @@ export default function SettingsPage() {
   const [policyErrors, setPolicyErrors] = useState<string[]>([]);
 
   useEffect(() => {
-    document.title = 'Settings | AssetFlow';
+    document.title = 'Settings | Smart Ledger';
   }, []);
 
   const allRulesPassed = POLICY_RULES.every(r => r.test(newPassword)) && newPassword.length > 0;

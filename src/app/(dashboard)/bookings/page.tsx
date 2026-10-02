@@ -34,7 +34,7 @@ export default function BookingsPage() {
   const toast = useToast();
 
   useEffect(() => {
-    document.title = 'Bookings | AssetFlow';
+    document.title = 'Bookings | Smart Ledger';
   }, []);
 
   const fetchBookings = useCallback(() => {

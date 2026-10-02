@@ -34,7 +34,7 @@ export default function RegisterAssetPage() {
   const fieldSchema = (selectedCategory?.fieldSchema || {}) as FieldSchema;
 
   useEffect(() => {
-    document.title = 'Register Asset | AssetFlow';
+    document.title = 'Register Asset | Smart Ledger';
     Promise.all([
       fetch('/api/org/categories').then(r => r.json()),
       fetch('/api/org/departments').then(r => r.json()),

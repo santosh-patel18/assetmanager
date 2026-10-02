@@ -37,7 +37,7 @@ export default function ScannerPage() {
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
-    document.title = 'QR Scanner | AssetFlow';
+    document.title = 'QR Scanner | Smart Ledger';
   }, []);
 
   const handleScanResult = useCallback(async (decodedText: string) => {

@@ -42,7 +42,7 @@ export default function AllocationsPage() {
   const toast = useToast();
 
   useEffect(() => {
-    document.title = 'Allocations | AssetFlow';
+    document.title = 'Allocations | Smart Ledger';
   }, []);
 
   const fetchAllocations = useCallback(() => {

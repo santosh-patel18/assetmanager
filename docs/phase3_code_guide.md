@@ -1,6 +1,6 @@
 # Phase 3 — Code Guide (Beginner-Friendly)
 
-This document explains the new code and security concepts introduced in Phase 3 of AssetFlow.
+This document explains the new code and security concepts introduced in Phase 3 of Smart Ledger.
 
 ---
 

@@ -1,5 +1,5 @@
 /**
- * In-memory rate limiter for AssetFlow API routes.
+ * In-memory rate limiter for Smart Ledger API routes.
  * 
  * For production, replace with Redis-backed rate limiting (e.g., @upstash/ratelimit).
  * This in-memory implementation works for single-instance deployments.

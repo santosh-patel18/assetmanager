@@ -63,7 +63,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = 'Dashboard | AssetFlow';
+    document.title = 'Dashboard | Smart Ledger';
   }, []);
 
   const fetchDashboard = useCallback(() => {

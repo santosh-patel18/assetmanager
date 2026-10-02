@@ -1,5 +1,5 @@
 /**
- * Structured logger for AssetFlow.
+ * Structured logger for Smart Ledger.
  * Outputs JSON in production (machine-parseable), pretty-prints in development.
  *
  * Usage:

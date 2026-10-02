@@ -1,4 +1,4 @@
-# AssetFlow
+# Smart Ledger
 
 **Enterprise Asset & Resource Management System**
 
@@ -110,7 +110,7 @@ cp .env.example .env
 Edit `.env` with your values:
 
 ```env
-DATABASE_URL="postgresql://postgres:yourpassword@localhost:5432/assetflow?schema=public"
+DATABASE_URL="postgresql://postgres:yourpassword@localhost:5432/Smart Ledger?schema=public"
 JWT_SECRET="generate-with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
@@ -119,7 +119,7 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
 ```bash
 # Create the database (if it doesn't exist)
-createdb assetflow
+createdb Smart Ledger
 
 # Run migrations
 npx prisma migrate deploy
@@ -263,7 +263,7 @@ erDiagram
 ## Project Structure
 
 ```
-assetflow/
+Smart Ledger/
 ├── src/
 │   ├── app/
 │   │   ├── (auth)/            # Login, Signup, Forgot Password pages

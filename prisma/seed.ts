@@ -4,16 +4,16 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding AssetFlow database...');
+  console.log('🌱 Seeding Smart Ledger database...');
 
   // --- 1. Create Admin user ---
   const adminPassword = await bcrypt.hash('Admin@123', 12);
   const admin = await prisma.employee.upsert({
-    where: { email: 'admin@assetflow.com' },
+    where: { email: 'admin@smartledger.com' },
     update: {},
     create: {
       name: 'System Admin',
-      email: 'admin@assetflow.com',
+      email: 'admin@smartledger.com',
       passwordHash: adminPassword,
       role: 'admin',
       status: 'Active',
@@ -68,11 +68,11 @@ async function main() {
   // --- 3. Create Users for each role ---
   const managerPassword = await bcrypt.hash('Manager@123', 12);
   const manager = await prisma.employee.upsert({
-    where: { email: 'manager@assetflow.com' },
+    where: { email: 'manager@smartledger.com' },
     update: {},
     create: {
       name: 'Alice Manager',
-      email: 'manager@assetflow.com',
+      email: 'manager@smartledger.com',
       passwordHash: managerPassword,
       role: 'asset_manager',
       departmentId: operations.id,
@@ -83,11 +83,11 @@ async function main() {
 
   const headPassword = await bcrypt.hash('Head@123', 12);
   const deptHead = await prisma.employee.upsert({
-    where: { email: 'head@assetflow.com' },
+    where: { email: 'head@smartledger.com' },
     update: {},
     create: {
       name: 'Bob DeptHead',
-      email: 'head@assetflow.com',
+      email: 'head@smartledger.com',
       passwordHash: headPassword,
       role: 'department_head',
       departmentId: engineering.id,
@@ -104,11 +104,11 @@ async function main() {
 
   const empPassword = await bcrypt.hash('Employee@123', 12);
   const employee1 = await prisma.employee.upsert({
-    where: { email: 'charlie@assetflow.com' },
+    where: { email: 'charlie@smartledger.com' },
     update: {},
     create: {
       name: 'Charlie Employee',
-      email: 'charlie@assetflow.com',
+      email: 'charlie@smartledger.com',
       passwordHash: empPassword,
       role: 'employee',
       departmentId: frontend.id,
@@ -117,11 +117,11 @@ async function main() {
   });
 
   const employee2 = await prisma.employee.upsert({
-    where: { email: 'diana@assetflow.com' },
+    where: { email: 'diana@smartledger.com' },
     update: {},
     create: {
       name: 'Diana Employee',
-      email: 'diana@assetflow.com',
+      email: 'diana@smartledger.com',
       passwordHash: empPassword,
       role: 'employee',
       departmentId: backend.id,
@@ -285,11 +285,11 @@ async function main() {
   }
 
   console.log('\n✅ Seed complete! Login credentials:');
-  console.log('   Admin:          admin@assetflow.com / Admin@123');
-  console.log('   Asset Manager:  manager@assetflow.com / Manager@123');
-  console.log('   Dept Head:      head@assetflow.com / Head@123');
-  console.log('   Employee:       charlie@assetflow.com / Employee@123');
-  console.log('   Employee:       diana@assetflow.com / Employee@123');
+  console.log('   Admin:          admin@smartledger.com / Admin@123');
+  console.log('   Asset Manager:  manager@smartledger.com / Manager@123');
+  console.log('   Dept Head:      head@smartledger.com / Head@123');
+  console.log('   Employee:       charlie@smartledger.com / Employee@123');
+  console.log('   Employee:       diana@smartledger.com / Employee@123');
 }
 
 main()

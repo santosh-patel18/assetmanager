@@ -1,6 +1,6 @@
 # Phase 2 — Code Guide (Beginner-Friendly)
 
-This document explains the new code and concepts introduced in Phase 2 of AssetFlow.
+This document explains the new code and concepts introduced in Phase 2 of Smart Ledger.
 
 ---
 
@@ -30,7 +30,7 @@ const transporter = nodemailer.createTransport({
 
 // 2. Send an email
 await transporter.sendMail({
-  from: 'AssetFlow <noreply@example.com>',
+  from: 'Smart Ledger <noreply@example.com>',
   to: 'recipient@example.com',
   subject: 'Asset Assigned',
   html: '<p>A laptop has been assigned to you.</p>',
@@ -38,7 +38,7 @@ await transporter.sendMail({
 ```
 
 #### What Is SMTP?
-SMTP is the protocol (set of rules) that email servers use to send messages. When you configure SMTP in AssetFlow, you're telling it how to connect to your email provider (Gmail, SendGrid, etc.) to send notifications.
+SMTP is the protocol (set of rules) that email servers use to send messages. When you configure SMTP in Smart Ledger, you're telling it how to connect to your email provider (Gmail, SendGrid, etc.) to send notifications.
 
 #### Gmail App Passwords
 If you're using Gmail, you can't use your regular password. You need to generate an "App Password":

@@ -1,5 +1,5 @@
 /**
- * Centralized API route handler for AssetFlow.
+ * Centralized API route handler for Smart Ledger.
  *
  * Wraps route handlers with:
  * - Structured error handling (AppError → HTTP response)

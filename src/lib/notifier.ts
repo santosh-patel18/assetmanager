@@ -1,5 +1,5 @@
 /**
- * Notification system for AssetFlow.
+ * Notification system for Smart Ledger.
  *
  * Supports two channels:
  * - **in_app**: Stores notifications in the database (always enabled)
@@ -27,7 +27,7 @@ const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || '587', 10);
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASSWORD = process.env.SMTP_PASSWORD;
-const SMTP_FROM = process.env.SMTP_FROM || 'AssetFlow <noreply@assetflow.app>';
+const SMTP_FROM = process.env.SMTP_FROM || 'Smart Ledger <noreply@smartledger.com>';
 const SMTP_SECURE = process.env.SMTP_SECURE === 'true'; // true for port 465
 
 const isEmailConfigured = !!(SMTP_HOST && SMTP_USER && SMTP_PASSWORD);
@@ -96,7 +96,7 @@ function wrapEmailTemplate(subject: string, body: string): string {
         <p style="color: #3f3f46; font-size: 14px; line-height: 1.6; margin: 0 0 24px;">${body}</p>
         <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 24px 0;">
         <p style="color: #a1a1aa; font-size: 12px; text-align: center; margin: 0;">
-          This is an automated notification from AssetFlow. Do not reply to this email.
+          This is an automated notification from Smart Ledger. Do not reply to this email.
         </p>
       </div>
     </body>
@@ -150,7 +150,7 @@ export async function notify(
     });
 
     if (recipient?.email) {
-      const subject = NOTIFICATION_SUBJECTS[type] || 'AssetFlow Notification';
+      const subject = NOTIFICATION_SUBJECTS[type] || 'Smart Ledger Notification';
       // Fire-and-forget — don't block the caller
       sendEmail(recipient.email, subject, message).catch(() => {});
     }
@@ -187,7 +187,7 @@ export async function notifyMultiple(
       select: { email: true, name: true },
     });
 
-    const subject = NOTIFICATION_SUBJECTS[type] || 'AssetFlow Notification';
+    const subject = NOTIFICATION_SUBJECTS[type] || 'Smart Ledger Notification';
     for (const recipient of recipients) {
       if (recipient.email) {
         sendEmail(recipient.email, subject, message).catch(() => {});

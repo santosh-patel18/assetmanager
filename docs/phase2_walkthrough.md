@@ -45,7 +45,7 @@ async findMany({ model, args, query }) {
 }
 ```
 
-**File**: [db.ts](file:///d:/study/projrcts/assetflow/assetflow/src/lib/db.ts)
+**File**: [db.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/src/lib/db.ts)
 
 ---
 
@@ -116,7 +116,7 @@ notify(recipientId, type, message)
 - **Fire-and-forget emails** — Emails are sent asynchronously, never blocking the main request
 - **Graceful degradation** — If SMTP is not configured, falls back to in-app only
 - **SMTP verification on startup** — Checks the connection once and logs the result
-- **HTML email template** — Clean, branded template with the AssetFlow logo
+- **HTML email template** — Clean, branded template with the Smart Ledger logo
 - **Sensitive data redaction** — Passwords are never sent in notification emails
 - **Bulk notifications** — `notifyMultiple()` creates DB records in bulk, sends individual emails
 
@@ -127,11 +127,11 @@ SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="587"
 SMTP_USER="your-email@gmail.com"
 SMTP_PASSWORD="your-app-password"
-SMTP_FROM="AssetFlow <noreply@yourdomain.com>"
+SMTP_FROM="Smart Ledger <noreply@yourdomain.com>"
 NOTIFICATION_CHANNEL="both"  # in_app | email | both
 ```
 
-**File**: [notifier.ts](file:///d:/study/projrcts/assetflow/assetflow/src/lib/notifier.ts)
+**File**: [notifier.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/src/lib/notifier.ts)
 
 ---
 
@@ -177,7 +177,7 @@ Turns `?search=laptop` into:
 #### `parseSortParams(request, allowedFields)` → Prisma orderBy
 Turns `?sort=name&order=asc` into `{ name: 'asc' }`. Validates against allowed fields.
 
-**File**: [pagination.ts](file:///d:/study/projrcts/assetflow/assetflow/src/lib/pagination.ts)
+**File**: [pagination.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/src/lib/pagination.ts)
 
 ---
 
@@ -192,7 +192,7 @@ Created a comprehensive GitHub README covering:
 - Database schema diagram (Mermaid ER diagram)
 - Project structure overview
 
-**File**: [README.md](file:///d:/study/projrcts/assetflow/assetflow/README.md)
+**File**: [README.md](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/README.md)
 
 ---
 

@@ -16,7 +16,7 @@ const JWT_SECRET: string = process.env.JWT_SECRET;
 
 const BCRYPT_ROUNDS = 12;
 const TOKEN_EXPIRY = '7d';
-const COOKIE_NAME = 'assetflow_token';
+const COOKIE_NAME = 'smartledger_token';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 // ─── Login attempt tracking (account lockout) ─────────────────────

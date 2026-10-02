@@ -1,5 +1,5 @@
 /**
- * Shared pagination utility for AssetFlow API list endpoints.
+ * Shared pagination utility for Smart Ledger API list endpoints.
  *
  * Supports offset-based pagination with standardized response shape.
  *

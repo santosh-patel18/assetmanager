@@ -1,6 +1,6 @@
 # Phase 1 — Code Guide (Beginner-Friendly)
 
-This document explains **every language, technology, and code pattern** used in Phase 1 of AssetFlow. It's written for someone who's just starting out — no prior coding knowledge assumed.
+This document explains **every language, technology, and code pattern** used in Phase 1 of Smart Ledger. It's written for someone who's just starting out — no prior coding knowledge assumed.
 
 ---
 
@@ -43,7 +43,7 @@ age = "twenty-five";         // ❌ ERROR! TypeScript catches this mistake immed
 
 ```typescript
 // 1. Variables with types
-const name: string = "AssetFlow";    // Text
+const name: string = "Smart Ledger";    // Text
 const maxAttempts: number = 5;       // Number
 const isActive: boolean = true;      // True/False
 
@@ -105,7 +105,7 @@ const Status = {
 
 ```json
 {
-  "name": "assetflow",
+  "name": "Smart Ledger",
   "version": "1.0.0",
   "scripts": {
     "dev": "next dev",
@@ -198,7 +198,7 @@ SELECT * FROM employees WHERE status = 'Active';
 | **What is it?** | A framework built on top of Node.js for building full-stack web apps |
 | **Created by** | Vercel |
 | **Key feature** | **File-based routing** — create a file at `src/app/api/auth/login/route.ts` and it automatically becomes the API endpoint `/api/auth/login` |
-| **Used for** | Both the frontend (React pages) and backend (API routes) of AssetFlow |
+| **Used for** | Both the frontend (React pages) and backend (API routes) of Smart Ledger |
 
 ### Prisma (Database ORM)
 
@@ -713,7 +713,7 @@ const merged = { ...defaults, ...custom };
 
 ## Summary
 
-| Technology | Role in AssetFlow |
+| Technology | Role in Smart Ledger |
 |-----------|-------------------|
 | **TypeScript** | All application code — type-safe JavaScript |
 | **Next.js** | Web framework — handles routing, API endpoints, and frontend |

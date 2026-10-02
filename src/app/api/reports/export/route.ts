@@ -67,7 +67,7 @@ export async function GET(request: Request) {
       return new Response(header + '\n' + rows, {
         headers: {
           'Content-Type': 'text/csv',
-          'Content-Disposition': `attachment; filename="assetflow_export_${new Date().toISOString().split('T')[0]}.csv"`,
+          'Content-Disposition': `attachment; filename="smartledger_export_${new Date().toISOString().split('T')[0]}.csv"`,
         },
       });
     }

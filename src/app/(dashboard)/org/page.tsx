@@ -46,7 +46,7 @@ export default function OrgPage() {
   const [confirmState, setConfirmState] = useState<{ open: boolean; title: string; description: string; onConfirm: () => Promise<void> }>({ open: false, title: '', description: '', onConfirm: async () => {} });
 
   useEffect(() => {
-    document.title = 'Organization | AssetFlow';
+    document.title = 'Organization | Smart Ledger';
   }, []);
 
   const fetchAll = useCallback(() => {

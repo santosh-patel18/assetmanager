@@ -1,6 +1,6 @@
-# AssetFlow — Development Brief
+# Smart Ledger — Development Brief
 
-> A concise summary of every phase in AssetFlow's journey from idea to production SaaS.
+> A concise summary of every phase in Smart Ledger's journey from idea to production SaaS.
 
 ---
 

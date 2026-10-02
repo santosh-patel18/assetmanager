@@ -6,9 +6,9 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: assetflow
-      POSTGRES_PASSWORD: assetflow_dev_password
-      POSTGRES_DB: assetflow
+      POSTGRES_USER: smartledger
+      POSTGRES_PASSWORD: smartledger_dev_password
+      POSTGRES_DB: smartledger
     ports:
       - '5432:5432'
     volumes:
@@ -16,12 +16,12 @@ services:
       # Enable btree_gist extension on startup (required for booking overlap prevention)
       - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U assetflow']
+      test: ['CMD-SHELL', 'pg_isready -U smartledger']
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # ─── AssetFlow Application ────────────────────────────────────────
+  # ─── Smart Ledger Application ────────────────────────────────────────
   app:
     build:
       context: .
@@ -30,7 +30,7 @@ services:
     ports:
       - '3000:3000'
     environment:
-      DATABASE_URL: postgresql://assetflow:assetflow_dev_password@db:5432/assetflow?schema=public
+      DATABASE_URL: postgresql://smartledger:smartledger_dev_password@db:5432/smartledger?schema=public
       JWT_SECRET: ${JWT_SECRET:-dev-only-secret-replace-in-production-immediately}
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       NODE_ENV: production

@@ -6,7 +6,7 @@ export default function RootNotFound() {
       <div className="max-w-md w-full text-center space-y-6">
         <div className="flex flex-col items-center gap-4">
           <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/30">
-            AF
+            SL
           </div>
         </div>
         <div className="space-y-2">
@@ -20,7 +20,7 @@ export default function RootNotFound() {
           href="/"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
         >
-          Back to AssetFlow
+          Back to Smart Ledger
         </Link>
       </div>
     </div>

@@ -1,4 +1,4 @@
-// ─── Shared TypeScript interfaces for AssetFlow ─────────────────
+// ─── Shared TypeScript interfaces for Smart Ledger ─────────────────
 // Aligned with Prisma schema field names (camelCase).
 
 // ─── Core Models ────────────────────────────────────────────────

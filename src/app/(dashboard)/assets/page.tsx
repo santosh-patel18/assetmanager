@@ -28,7 +28,7 @@ export default function AssetsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = 'Assets | AssetFlow';
+    document.title = 'Assets | Smart Ledger';
   }, []);
 
   const fetchAssets = useCallback(() => {

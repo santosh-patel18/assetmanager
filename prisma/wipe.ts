@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🗑️  Wiping all data from AssetFlow database...\n');
+  console.log('🗑️  Wiping all data from Smart Ledger database...\n');
 
   // Delete in correct order (foreign key dependencies)
   const notifs = await prisma.notification.deleteMany({});
@@ -64,7 +64,7 @@ async function main() {
 
   console.log('\n✅ All data wiped! Database is clean.');
   console.log('   Only the Admin account remains:');
-  console.log('   Email: admin@assetflow.com');
+  console.log('   Email: admin@smartledger.com');
   console.log('   Password: Admin@123');
 }
 

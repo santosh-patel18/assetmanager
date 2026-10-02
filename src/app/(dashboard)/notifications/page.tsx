@@ -21,7 +21,7 @@ export default function NotificationsPage() {
   const toast = useToast();
 
   useEffect(() => {
-    document.title = 'Notifications | AssetFlow';
+    document.title = 'Notifications | Smart Ledger';
   }, []);
 
   const fetchNotifications = useCallback(() => {

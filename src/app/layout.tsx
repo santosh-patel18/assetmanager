@@ -3,12 +3,12 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'AssetFlow — Enterprise Asset & Resource Management',
-    template: '%s | AssetFlow',
+    default: 'Smart Ledger — Enterprise Asset & Resource Management',
+    template: '%s | Smart Ledger',
   },
   description: 'Track, allocate, and maintain physical assets and shared bookable resources across your organization. Multi-location, multi-department, with full audit trails.',
   keywords: ['asset management', 'resource tracking', 'inventory', 'allocation', 'maintenance', 'audit', 'enterprise'],
-  authors: [{ name: 'AssetFlow' }],
+  authors: [{ name: 'Smart Ledger' }],
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
@@ -17,10 +17,10 @@ export const metadata: Metadata = {
     apple: '/icon.jpg',
   },
   openGraph: {
-    title: 'AssetFlow — Enterprise Asset & Resource Management',
+    title: 'Smart Ledger — Enterprise Asset & Resource Management',
     description: 'Track, allocate, and maintain physical assets and shared bookable resources across your organization.',
     type: 'website',
-    siteName: 'AssetFlow',
+    siteName: 'Smart Ledger',
   },
 };
 

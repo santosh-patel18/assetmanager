@@ -43,7 +43,7 @@ export default function MaintenancePage() {
   const [confirmState, setConfirmState] = useState<{ open: boolean; title: string; description: string; onConfirm: () => Promise<void> }>({ open: false, title: '', description: '', onConfirm: async () => {} });
 
   useEffect(() => {
-    document.title = 'Maintenance | AssetFlow';
+    document.title = 'Maintenance | Smart Ledger';
   }, []);
 
   const fetchData = useCallback(() => {

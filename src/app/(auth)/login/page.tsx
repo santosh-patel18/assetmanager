@@ -47,10 +47,10 @@ export default function LoginPage() {
     )}>
       <CardHeader className="text-center space-y-2">
         <div className="mx-auto h-14 w-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl mb-2 shadow-lg shadow-indigo-500/30">
-          AF
+          SL
         </div>
         <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-        <CardDescription>Sign in to your AssetFlow account</CardDescription>
+        <CardDescription>Sign in to your Smart Ledger account</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">

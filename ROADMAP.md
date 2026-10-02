@@ -1,4 +1,4 @@
-# AssetFlow — Complete Development Roadmap
+# Smart Ledger — Complete Development Roadmap
 
 > Enterprise Asset & Resource Management Platform  
 > Last updated: August 30, 2026
@@ -260,7 +260,7 @@
 
 ## Phase 16 — Integrations
 
-> **Goal**: Connect AssetFlow with the tools your company already uses  
+> **Goal**: Connect Smart Ledger with the tools your company already uses  
 > **Effort**: ~3-4 days  
 > **Depends on**: Phase 10
 
@@ -346,7 +346,7 @@
 
 ## Phase 18 — Enterprise Features
 
-> **Goal**: Make AssetFlow ready for large organizations with complex workflows  
+> **Goal**: Make Smart Ledger ready for large organizations with complex workflows  
 > **Effort**: ~4-5 days  
 > **Depends on**: Phase 16
 

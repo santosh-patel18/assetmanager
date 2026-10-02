@@ -31,7 +31,7 @@ export default function PublicScanPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    document.title = `Scan — ${tag} | AssetFlow`;
+    document.title = `Scan — ${tag} | Smart Ledger`;
     fetch(`/api/public/scan/${tag}`)
       .then(r => r.json())
       .then(d => {
@@ -69,7 +69,7 @@ export default function PublicScanPage() {
             </p>
             <Link href="/login">
               <Button variant="outline" className="mt-4 gap-2">
-                <ArrowRight className="h-4 w-4" /> Sign In to AssetFlow
+                <ArrowRight className="h-4 w-4" /> Sign In to Smart Ledger
               </Button>
             </Link>
           </CardContent>
@@ -84,8 +84,8 @@ export default function PublicScanPage() {
         {/* Header with gradient */}
         <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 p-6 text-center text-white">
           <div className="flex items-center justify-center gap-2 mb-1">
-            <div className="h-7 w-7 rounded-md bg-white/20 flex items-center justify-center text-sm font-bold">AF</div>
-            <span className="text-sm font-medium opacity-80">AssetFlow</span>
+            <div className="h-7 w-7 rounded-md bg-white/20 flex items-center justify-center text-sm font-bold">SL</div>
+            <span className="text-sm font-medium opacity-80">Smart Ledger</span>
           </div>
           {asset.photoUrl ? (
             <div className="mt-4 mb-3">

@@ -52,7 +52,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="flex flex-col items-center gap-1">
-            <p className="text-sm font-medium gradient-text">AssetFlow</p>
+            <p className="text-sm font-medium gradient-text">Smart Ledger</p>
             <p className="text-muted-foreground text-xs">Loading your workspace...</p>
           </div>
         </div>

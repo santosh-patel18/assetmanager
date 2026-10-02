@@ -19,7 +19,7 @@ export default function ActivityPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = 'Activity Log | AssetFlow';
+    document.title = 'Activity Log | Smart Ledger';
   }, []);
 
   const fetchActivity = useCallback(() => {

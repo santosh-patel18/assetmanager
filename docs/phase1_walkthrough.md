@@ -1,8 +1,8 @@
 # Phase 1 — Complete Walkthrough
 
-## What Is AssetFlow?
+## What Is Smart Ledger?
 
-AssetFlow is an **Enterprise Asset & Resource Management System** — a web application that helps organizations track, manage, and control their physical assets (laptops, desks, vehicles, equipment, etc.). Think of it like an inventory management system, but specifically designed for companies to know:
+Smart Ledger is an **Enterprise Asset & Resource Management System** — a web application that helps organizations track, manage, and control their physical assets (laptops, desks, vehicles, equipment, etc.). Think of it like an inventory management system, but specifically designed for companies to know:
 
 - **Who** has which asset
 - **Where** each asset is
@@ -36,9 +36,9 @@ Phase 1 focused on building the **backend foundation** — the server-side infra
 
 CORS is the mechanism that tells the browser: *"It's okay, I trust requests from this specific website."*
 
-### How It Works in AssetFlow
+### How It Works in Smart Ledger
 
-**File**: [middleware.ts](file:///d:/study/projrcts/assetflow/assetflow/src/middleware.ts)
+**File**: [middleware.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/src/middleware.ts)
 
 ```
 Browser (localhost:3000)  →  "Can I send a request?"  →  Server
@@ -81,8 +81,8 @@ Without lockout protection, an attacker could try millions of password combinati
 
 ### How It Works
 
-**File**: [auth.ts](file:///d:/study/projrcts/assetflow/assetflow/src/lib/auth.ts)  
-**File**: [login/route.ts](file:///d:/study/projrcts/assetflow/assetflow/src/app/api/auth/login/route.ts)
+**File**: [auth.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/src/lib/auth.ts)  
+**File**: [login/route.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/src/app/api/auth/login/route.ts)
 
 The system tracks login attempts using three functions:
 
@@ -160,7 +160,7 @@ Why? Because:
 
 ### How It Works
 
-**File**: [db.ts](file:///d:/study/projrcts/assetflow/assetflow/src/lib/db.ts)
+**File**: [db.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/src/lib/db.ts)
 
 The Prisma client is extended with custom behavior for three models: **Department**, **Employee**, and **Asset**.
 
@@ -203,7 +203,7 @@ Vitest is a **test runner** — a tool that automatically runs your code with kn
 
 ### Setup
 
-**File**: [vitest.config.ts](file:///d:/study/projrcts/assetflow/assetflow/vitest.config.ts)
+**File**: [vitest.config.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/vitest.config.ts)
 
 Key configuration:
 - **Environment**: `node` (not a browser — these are backend tests)
@@ -226,23 +226,23 @@ npm run test:coverage   # Run tests + show code coverage report
 
 We wrote 4 test files covering the core backend logic:
 
-#### [enums.test.ts](file:///d:/study/projrcts/assetflow/assetflow/tests/unit/enums.test.ts) — 28 tests
+#### [enums.test.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/tests/unit/enums.test.ts) — 28 tests
 - Verifies every asset status has defined transitions
 - Verifies `isValidAssetTransition()` allows valid transitions and blocks invalid ones
 - Verifies `Disposed` is a terminal state (nothing transitions out of it)
 
-#### [auth.test.ts](file:///d:/study/projrcts/assetflow/assetflow/tests/unit/auth.test.ts) — 18 tests
+#### [auth.test.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/tests/unit/auth.test.ts) — 18 tests
 - **Password complexity**: Tests all 6 rules (length, uppercase, lowercase, number, special char)
 - **Login lockout**: Tests the full cycle (attempts → lockout → clear)
 - **Bcrypt**: Tests password hashing and verification (round-trip)
 - **JWT**: Tests token generation, verification, and tamper detection
 
-#### [errors.test.ts](file:///d:/study/projrcts/assetflow/assetflow/tests/unit/errors.test.ts) — 24 tests
+#### [errors.test.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/tests/unit/errors.test.ts) — 24 tests
 - Verifies all error classes produce correct HTTP status codes and error codes
 - Verifies `toErrorResponse()` converts errors to proper HTTP responses
 - Verifies `fromPrismaError()` handles database-specific error codes (P2002, P2025, 23P01)
 
-#### [validations.test.ts](file:///d:/study/projrcts/assetflow/assetflow/tests/unit/validations.test.ts) — 33 tests
+#### [validations.test.ts](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/tests/unit/validations.test.ts) — 33 tests
 - Tests `loginSchema`, `signupSchema`, `forgotPasswordSchema` accept valid data and reject invalid data
 - Tests `createAssetSchema` required fields
 - Tests `validateAttributesAgainstSchema()` with various field types
@@ -251,7 +251,7 @@ We wrote 4 test files covering the core backend logic:
 
 ## 6. Environment Configuration
 
-**File**: [.env.example](file:///d:/study/projrcts/assetflow/assetflow/.env.example)
+**File**: [.env.example](file:///d:/study/projrcts/Smart Ledger/Smart Ledger/.env.example)
 
 This file documents every environment variable the app needs. Key additions in Phase 1:
 

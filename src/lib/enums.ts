@@ -1,5 +1,5 @@
 /**
- * Centralized enums for AssetFlow.
+ * Centralized enums for Smart Ledger.
  * Single source of truth — replace all string literals with these constants.
  */
 

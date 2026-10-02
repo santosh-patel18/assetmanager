@@ -1,5 +1,5 @@
 /**
- * Input sanitization utilities for AssetFlow.
+ * Input sanitization utilities for Smart Ledger.
  *
  * Provides defense-in-depth against XSS, injection, and other input-based attacks.
  * Prisma already parameterizes SQL queries, so these utilities focus on:

@@ -48,7 +48,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('assetflow-sidebar-collapsed') === 'true';
+      return localStorage.getItem('smartledger-sidebar-collapsed') === 'true';
     }
     return false;
   });
@@ -58,7 +58,7 @@ export function Sidebar() {
   const toggleCollapsed = () => {
     setCollapsed(prev => {
       const next = !prev;
-      localStorage.setItem('assetflow-sidebar-collapsed', String(next));
+      localStorage.setItem('smartledger-sidebar-collapsed', String(next));
       return next;
     });
   };
@@ -89,10 +89,10 @@ export function Sidebar() {
       <div className="flex items-center h-16 px-4 border-b border-border">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg shadow-indigo-500/25">
-            AF
+            SL
           </div>
           {!collapsed && (
-            <span className="font-bold text-lg gradient-text">AssetFlow</span>
+            <span className="font-bold text-lg gradient-text">Smart Ledger</span>
           )}
         </div>
       </div>
@@ -205,9 +205,9 @@ export function Sidebar() {
             <div className="flex items-center justify-between h-16 px-4 border-b border-border">
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                  AF
+                  SL
                 </div>
-                <span className="font-bold text-lg gradient-text">AssetFlow</span>
+                <span className="font-bold text-lg gradient-text">Smart Ledger</span>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)} className="h-8 w-8">
                 <X className="h-4 w-4" />
