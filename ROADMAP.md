@@ -1,14 +1,13 @@
 # Smart Ledger — Complete Development Roadmap
 
 > Enterprise Asset & Resource Management Platform  
-> Last updated: August 30, 2026
+> Last updated: October 2, 2026
 
 ---
 
 ## Table of Contents
 
 - [Completed Phases](#-completed-phases)
-- [Phase 6 — QR Code & Physical Tracking](#phase-6--qr-code--physical-tracking)
 - [Phase 7 — Financial Module](#phase-7--financial-module)
 - [Phase 8 — Vendor & Warranty Management](#phase-8--vendor--warranty-management)
 - [Phase 9 — Preventive Maintenance & Scheduling](#phase-9--preventive-maintenance--scheduling)
@@ -41,28 +40,18 @@
 | **Phase 4** | UI/UX Beautification | 6 new components (Toast, Tooltip, Skeleton, EmptyState, StatCard, Breadcrumb), sidebar upgrade, animated KPIs, staggered animations, mobile hamburger menu | 268 |
 | **Phase 4.5** | Quality Hardening | Replace alert()/confirm() → ConfirmDialog, N+1 fix, pagination, error boundaries, TypeScript interfaces, button loading states, sidebar persistence, favicon, SEO, focus refresh | 268 |
 | **Phase 5** | Multi-Location & Custom Fields | Location hierarchy (7-level tree), LocationTreeSelect, location-scoped RBAC (`getLocationScope`), location-scoped dashboards/reports/audits/maintenance, asset location transfer, DynamicFieldRenderer, custom field export/search | 268 |
+| **Phase 6** | QR Code & Physical Tracking | QR code generation per asset, bulk PDF label printing (configurable grids), mobile camera scanner, public scan page, quick check-in/out via scan, asset photo upload, document attachment | 268 |
 
 **Current stats**: 268 tests · 52+ API routes · 17 pages · 20+ UI components · 12 database models · 0 TypeScript errors
 
 ---
 
-## Phase 6 — QR Code & Physical Tracking
+## ~~Phase 6 — QR Code & Physical Tracking~~ ✅
 
-> **Goal**: Scan any asset with a phone to see its full history  
-> **Effort**: ~2 days  
-> **Depends on**: Phase 5 ✅
+> **Completed**. QR generation, bulk PDF labels, mobile scanner, public scan page, photo upload, quick check-in/out.
+>
+> See [Completed Phases](#-completed-phases) table above.
 
-| Task | Details |
-|------|---------|
-| QR code generation | Auto-generate QR code per asset (encode asset ID + URL) |
-| QR display on asset detail | Show QR on asset detail page with download button (PNG/SVG) |
-| Bulk label printing | Generate PDF sheet of QR labels (configurable grid: 2x4, 3x8, etc.) |
-| Mobile scan page | Camera-based QR scanner → redirect to asset detail |
-| Barcode support | Optional Code128 barcode for warehouse/handheld scanners |
-| Asset photo upload | Upload/capture photo during registration, display in detail page |
-| Quick check-in/out | Scan QR → one-tap assign/return asset |
-
-**Recommended packages**: `qrcode` (generation), `html5-qrcode` (scanner), `@react-pdf/renderer` (bulk labels)
 
 ---
 
@@ -70,7 +59,7 @@
 
 > **Goal**: Track asset value, depreciation, and purchase cost for accounting  
 > **Effort**: ~2-3 days  
-> **Depends on**: Phase 5 ✅
+> **Depends on**: Phase 5 ✅, Phase 6 ✅
 
 | Task | Details |
 |------|---------|
@@ -637,8 +626,8 @@ Dark mode only                         →    Dark/Light theme toggle
 
 ```mermaid
 graph TD
-    P5[Phase 5 ✅] --> P6[Phase 6: QR Codes]
-    P5 --> P7[Phase 7: Financials]
+    P5[Phase 5 ✅] --> P6[Phase 6 ✅]
+    P6 --> P7[Phase 7: Financials]
     P7 --> P8[Phase 8: Vendors]
     P8 --> P9[Phase 9: Preventive Maint.]
     P9 --> P10[Phase 10: Mobile + Reports]
@@ -659,5 +648,6 @@ graph TD
     P21 --> P22[Phase 22: Go-to-Market]
     
     style P5 fill:#22c55e,color:#fff
+    style P6 fill:#22c55e,color:#fff
     style P22 fill:#6366f1,color:#fff
 ```
