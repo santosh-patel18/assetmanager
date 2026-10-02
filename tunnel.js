@@ -1,6 +1,6 @@
 const { exec } = require('child_process');
 
-const SUBDOMAIN = 'assetflow-erp';
+const SUBDOMAIN = 'smartledger-erp';
 const PORT = 3000;
 const DURATION_MS = 60 * 60 * 1000; // 1 hour
 const endTime = Date.now() + DURATION_MS;
@@ -42,6 +42,6 @@ function startTunnel() {
   });
 }
 
-console.log('🚀 AssetFlow Tunnel — will stay alive for 1 hour');
+console.log('🚀 Smart Ledger Tunnel — will stay alive for 1 hour');
 console.log('   Press Ctrl+C to stop early\n');
 startTunnel();
