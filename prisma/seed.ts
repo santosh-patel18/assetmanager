@@ -198,9 +198,19 @@ async function main() {
   ];
 
   for (const assetData of assetsData) {
+    const { assetTag, ...rest } = assetData;
     await prisma.asset.upsert({
-      where: { assetTag: assetData.assetTag },
-      update: {},
+      where: { assetTag },
+      update: {
+        // Ensure financial fields are populated on re-seed
+        purchaseOrderNumber: rest.purchaseOrderNumber ?? undefined,
+        invoiceNumber: rest.invoiceNumber ?? undefined,
+        supplier: rest.supplier ?? undefined,
+        depreciationMethod: rest.depreciationMethod ?? undefined,
+        usefulLifeMonths: rest.usefulLifeMonths ?? undefined,
+        salvageValue: rest.salvageValue ?? undefined,
+        warrantyEndDate: rest.warrantyEndDate ?? undefined,
+      },
       create: assetData,
     });
   }

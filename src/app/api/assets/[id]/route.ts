@@ -44,6 +44,12 @@ export async function GET(
           orderBy: { startTime: 'desc' },
           take: 20,
         },
+        insurancePolicies: {
+          orderBy: { endDate: 'desc' },
+        },
+        depreciationRecords: {
+          orderBy: [{ year: 'asc' }, { month: 'asc' }],
+        },
       },
     });
 

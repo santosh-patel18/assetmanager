@@ -158,16 +158,7 @@ assetflow/
 5. **Phase 4.5 — Quality Hardening**: Fixed N+1 queries, added pagination, error boundaries, TypeScript interfaces, confirmation dialogs
 6. **Phase 5 — Multi-Location & Custom Fields**: Location hierarchy, location-scoped RBAC, dynamic custom fields per category
 7. **Phase 6 — QR Code & Physical Tracking**: QR generation, bulk PDF label printing, camera scanner, photo upload
-8. **Phase 7 — Financial Module** *(In Progress)*:
-   - ✅ Finance Manager role added to RBAC
-   - ✅ Prisma schema: 7 financial fields on Asset, InsurancePolicy model, DepreciationRecord model
-   - ✅ Depreciation engine (3 methods: straight-line, declining-balance, sum-of-years)
-   - ✅ Zod validations for financials and insurance
-   - ✅ API endpoints: asset financials, depreciation, insurance CRUD, expiring, reports
-   - ✅ Financials dashboard page (KPIs, valuation charts, depreciation table, insurance table)
-   - ✅ Sidebar updated with Financials nav and FM role access
-   - ✅ Seed data with Finance Manager user and sample financial/insurance data
-   - 🔲 Remaining: run seed to populate data, test all endpoints end-to-end, add financial tab on asset detail page
+8. **Phase 7 — Financial Module**: Finance Manager role, depreciation engine (3 methods), financial fields on Asset, InsurancePolicy & DepreciationRecord models, Zod validations, full API suite (asset financials CRUD, depreciation calculate & store, insurance CRUD + expiring, financial & depreciation reports), Financials dashboard (KPIs, valuation charts, depreciation & insurance tables, CSV export, currency toggle), Financial tab on asset detail page (procurement details, depreciation overview with progress bar, depreciation schedule table, insurance policies, edit dialog, calculate depreciation action), seed data with financial fields & insurance policies
 
 ### 📋 Next Phases (Not Started)
 
